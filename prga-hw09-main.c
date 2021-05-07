@@ -17,6 +17,8 @@
 #include "messages.h"
 #include "event_queue.h"
 #include "utils.h"
+#include "computation.h"
+#include "gui.h"
 
 #define READ_TIMEOUT_MS 10 // Timeout for io_getc_timeout function
 
@@ -28,8 +30,7 @@ typedef struct { // Structure definition for carrying all the important variable
 
 
 
-// assigns color to calculated fractals
-void redraw(int w, int h, uint8_t *grid, uint8_t threshold, unsigned char *out);
+
 
 
 void* input_thread_kb(void*);
@@ -65,10 +66,14 @@ int main(int argc, char *argv[]) {
 	call_termios(0);
 
 
+
+
+
     enum { INPUT_KB, INPUT_PIPE, MAIN_THREAD, NUM_THREADS }; // Creating an array of threads
     const char *thread_names[] = { "Keyboard Input", "Pipe Input", "Main Thread"};
     void* (*thr_functions[])(void*) = { input_thread_kb, input_thread_pipe, main_thread};
     pthread_t threads[NUM_THREADS];
+
 
 
     for(int i = 0; i < NUM_THREADS; ++i) { // Creating them and checking for error
@@ -99,30 +104,6 @@ int main(int argc, char *argv[]) {
 }
 
 
-// - function -----------------------------------------------------------------
-void redraw(int w, int h, uint8_t *grid, uint8_t threshold, unsigned char *out)
-{
-	int nsize = w * h;
-	unsigned char *cur = out;
-	for (int i = 0; i < nsize; ++i)
-	{
-		const int n = *(grid++);
-		const double t = 1. * n / threshold;
-		if (t < threshold)
-		{
-			*(cur++) = (int)(9 * (1 - t) * t * t * t * 255);
-			*(cur++) = (int)(15 * (1 - t) * (1 - t) * t * t * 255);
-			*(cur++) = (int)(8.5 * (1 - t) * (1 - t) * (1 - t) * t * 255);
-		}
-		else
-		{
-			for (int j = 0; j < 3; ++j)
-			{
-				*(cur++) = 0;
-			}
-		}
-	}
-}
 
 // - thread -----------------------------------------------------------------
 void* input_thread_kb(void *arg){ // Thread for reading an input from user keyboard
@@ -134,24 +115,23 @@ void* input_thread_kb(void *arg){ // Thread for reading an input from user keybo
 
     bool q = false;
 
-    while (!q && (c = getchar()) != EOF) { // Reading the user input while program isn't quited
+    while (!q && (c = getchar()) != EOF && c != 'q') { // Reading the user input while program isn't quited
         ev.type = EV_TYPE_NUM;
         switch(c) {
             case 'g':
                 ev.type = EV_GET_VERSION;
-                // TODO SENT to module
                 break;
             case 'a':
-                // TODO SENT to module
+                ev.type = EV_ABORT;
                 break;
             case 's':
-                // TODO SENT to module
+                ev.type = EV_SET_COMPUTE;
                 break;
-            case 'q': // In case of 'q' input, as request to quit the program
-                ev.type = EV_QUIT;
-                set_quit();
+            case 'c':
+                ev.type = EV_COMPUTE;
                 break;
-            default: // Ignore all the other keys
+            default:
+                info("Keabord command is unknown");
                 break;
         }
         if (ev.type != EV_TYPE_NUM){
@@ -239,14 +219,19 @@ void* main_thread(void *arg) { // Thread for reading an input from user keyboard
     // TODO: create and initialize computation structure
 
     // TODO: initialize GUI
-    xwin_init(computation.w, computation.h);*/
+    */
+
+
+    computation_init();
+    gui_init();
+
 
 
     while (!q) { // Reading the user input while program isn't quited
 
         event ev = queue_pop();
         msg.type = MSG_NBR;
-        // xwin_poll_events(); //restore possible shadowed window in ubuntu by reading all pending window events
+        // xwin_poll_events(); //restore possible shadowed window in ubuntu by reading all pending window event
         if (ev.source == EV_KEYBOARD) {
             switch (ev.type) {
                 case EV_QUIT:
@@ -259,15 +244,19 @@ void* main_thread(void *arg) { // Thread for reading an input from user keyboard
                     break;
                 case EV_SET_COMPUTE:
                     msg.type = MSG_SET_COMPUTE;
+                    info( set_compute(&msg) ? "set compute" : "fail set compute");
                     break;
                 case EV_COMPUTE:
+                    enable_comp();
                     msg.type = MSG_COMPUTE;
+                    info( compute(&msg) ? "compute" : "fail compute");
                     break;
                 case EV_ABORT:
                     msg.type = MSG_ABORT;
                     break;
                 default:
                     debug("Unknown message");
+                    break;
             }
             // TODO: handle events from keyboard
         } else if (ev.source == EV_NUCLEO) {
@@ -301,6 +290,8 @@ void* main_thread(void *arg) { // Thread for reading an input from user keyboard
     }
 
 
+    gui_cleanup();
+    computation_cleanup();
 
     // xwin_close();
     return &ret;
@@ -317,6 +308,25 @@ void process_pipe_message(event * const ev){
             break;
         case MSG_VERSION:
             fprintf(stderr, "Modelue wersion %d.%d-p%d\n", msg->data.version.major, msg->data.version.minor, msg->data.version.patch);
+            break;
+        case MSG_DONE:
+            info("Message done");
+            gui_refresh();
+            if (is_done()){
+                info("Computation done");
+            } else {
+                event event = { .type = EV_COMPUTE};
+                queue_push(event);
+            }
+            break;
+        case MSG_ABORT:
+            info("Computation aborted");
+            abort_comp();
+            break;
+        case MSG_COMPUTE_DATA:
+            if (!is_abort()) {
+                update_data(&(msg->data.compute_data));
+            }
             break;
         default:
             fprintf(stderr, "unknown message type in process pipi func\n");;

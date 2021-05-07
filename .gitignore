@@ -2,5 +2,7 @@ CMakeLists.txt
 *.o
 prgsem-main
 cmake-build-debug
-bin
+
 .idea
+include
+lib

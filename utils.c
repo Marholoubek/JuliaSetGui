@@ -2,9 +2,12 @@
 #include "utils.h"
 
 
-/*void my_assert(bool r, const char *fcname, int line, const char *fname){
-    //
-}*/
+void my_assert(bool r, const char *fcname, int line, const char *fname){
+    if (!r) {
+        fprintf(stderr, "ERROR: my_assert FAIL: %s() line %d in %s\n", fcname, line, fname);
+        exit(105);
+    }
+}
 
 void* my_alloc(size_t size){
     void *ret = malloc(size); // TODO validate
@@ -36,5 +39,12 @@ void info(const char *str){
 }
 void debug(const char *str){
     fprintf(stderr, "DEBUG %s\n", str);
+}
+
+void error(const char *str){
+    fprintf(stderr, "ERROR %s\n", str);
+}
+void warn(const char *str){
+    fprintf(stderr, "WARN %s\n", str);
 }
 
