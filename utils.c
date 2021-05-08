@@ -17,7 +17,6 @@ void* my_alloc(size_t size){
 
 void* my_calloc(size_t size){
     void *ret = calloc(size, size); // TODO validate
-
     return ret;
 }
 

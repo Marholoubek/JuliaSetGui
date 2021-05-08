@@ -76,14 +76,14 @@ void computation_cleanup(void){
 }
 
 bool reset_chunk(void){
-    if (!is_computing()) {
+    if (!is_abort()) {
         comp.cid = 0;
         comp.computing = true;
         comp.cur_x = comp.cur_y = 0;
         comp.chunk_re = comp.range_re_min;
         comp.chunk_im = comp.range_im_max;
     }
-    return is_computing();
+    return is_abort();
 }
 
 
@@ -143,6 +143,8 @@ bool compute(message *msg){
         } else {
             comp.computing = false;
             comp.done = true;
+            comp.abort = false;
+            debug("Yes byby I was here");
         }
     }
 
@@ -193,6 +195,7 @@ void update_image(int w, int h, unsigned char *img){
 
 void buffer_cleanup(void){
     computation_cleanup();
-    computation_init();
+    comp.grid = my_calloc(comp.grid_w * comp.grid_h);
+
 }
 
