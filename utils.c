@@ -15,6 +15,12 @@ void* my_alloc(size_t size){
     return ret;
 }
 
+void* my_calloc(size_t size){
+    void *ret = calloc(size, size); // TODO validate
+
+    return ret;
+}
+
 // - function -----------------------------------------------------------------
 void call_termios(int reset)
 {
