@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
 
     enum { INPUT_KB, INPUT_PIPE, MAIN_THREAD, WIN_THREAD, NUM_THREADS }; // Creating an array of threads
     const char *thread_names[] = { "keyboard_thread", "pipe_input_thread", "main_thread", "gui_win_thread"};
-    void* (*thr_functions[])(void*) = { input_thread_kb, input_thread_pipe, main_thread, qui_win_thread };
+    void* (*thr_functions[])(void*) = { input_thread_kb, input_thread_pipe, main_thread, gui_win_thread };
     pthread_t threads[NUM_THREADS];
 
 
@@ -285,7 +285,7 @@ void process_pipe_message(event * const ev){
     const message *msg = ev->data.msg;
     switch (msg->type) {
         case MSG_STARTUP:
-            fprintf(stderr, "Startup message: %s\n",msg.data.startup.message);
+            fprintf(stderr, "Startup message: %s\n",msg->data.startup.message);
             break;
         case MSG_OK:
             info("OK message from pipe");

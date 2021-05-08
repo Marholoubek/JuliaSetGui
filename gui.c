@@ -36,13 +36,13 @@ void gui_refresh(void){
 
 }
 
-void *gui_win_thread(void*){
+void *gui_win_thread(void* arg){
     bool quit = false;
     SDL_Event sdl_event;
     event ev;
     while (!quit){
         ev.type = EV_TYPE_NUM;
-        if (SDL_PoolEvent(&sdl_event)){
+        if (SDL_PollEvent(&sdl_event)){
             if (sdl_event.type == SDL_KEYDOWN){
                 switch (sdl_event.key.keysym.sym) {
                     case SDLK_q:
@@ -59,7 +59,7 @@ void *gui_win_thread(void*){
                         break;
 
                 }
-            } else if (event.type == SDL_KEYUP){
+            } else if (sdl_event.type == SDL_KEYUP){
 
             } else{
 
