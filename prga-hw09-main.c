@@ -255,6 +255,10 @@ void* main_thread(void *arg) { // Thread for reading an input from user keyboard
                 break;
             case EV_PIPE_IN_MESSAGE:
                 process_pipe_message(&ev);
+                break;
+            case MSG_STARTUP:
+                fprintf(stderr, "Startup message: %s\n",msg.data.startup.message);
+                break;
             default:
                 debug("Unknown message");
                 break;
