@@ -64,7 +64,8 @@ static struct {
 
 void computation_init(void){
 
-    comp.grid = my_alloc(comp.grid_w * comp.grid_h);
+    //comp.grid = my_alloc(comp.grid_w * comp.grid_h);
+    comp.grid = calloc(comp.grid_w * comp.grid_h, comp.grid_w * comp.grid_h); // TODO Validate
     comp.d_re = (comp.range_re_max - comp.range_re_min) / (1. * comp.grid_w);
     comp.d_im = -(comp.range_re_max - comp.range_re_min) / (1. * comp.grid_h);
     comp.nbr_chunks = (comp.grid_w * comp.grid_h) /  (comp.chunk_n_re * comp.chunk_n_im);
@@ -195,7 +196,6 @@ void update_image(int w, int h, unsigned char *img){
 
 void buffer_cleanup(void){
     computation_cleanup();
-    comp.grid = my_calloc(comp.grid_w * comp.grid_h);
-
+    computation_init();
 }
 
