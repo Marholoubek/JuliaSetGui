@@ -38,6 +38,7 @@ static struct {
 } comp = {
         .c_re = -0.4,
         .c_im = 0.6,
+        .n = 60,
         .range_re_min = -1.6,
         .range_re_max = 1.6,
         .range_im_min = -1.1,
@@ -140,10 +141,7 @@ bool compute(message *msg){
         msg->data.compute.cid = comp.cid;
         msg->data.compute.n_re = comp.chunk_n_re;
         msg->data.compute.n_im = comp.chunk_n_im;
-
     }
-
-
 
     return is_computing();
 }

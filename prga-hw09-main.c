@@ -115,7 +115,7 @@ void* input_thread_kb(void *arg){ // Thread for reading an input from user keybo
 
     bool q = false;
 
-    while (!q && (c = getchar()) != EOF && c != 'q') { // Reading the user input while program isn't quited
+    while (!q && (c = getchar()) != EOF && c != 'q') {
         ev.type = EV_TYPE_NUM;
         switch(c) {
             case 'g':
@@ -154,9 +154,9 @@ void* input_thread_pipe(void *arg){ // Thread for reading an input from pipe
     int i = 0;
     int len = 0;
 
-
     bool q = is_quit();
-    while ((io_getc_timeout(data->in_pipe, READ_TIMEOUT_MS, &c)) > 0) {}; // discard bordel
+
+    while ((io_getc_timeout(data->in_pipe, READ_TIMEOUT_MS, &c)) > 0) {};
 
     while (!q){ // While user don't want to quit
         int r = io_getc_timeout(data->in_pipe, READ_TIMEOUT_MS, &c); // Reading the pipe input
@@ -225,8 +225,6 @@ void* main_thread(void *arg) { // Thread for reading an input from user keyboard
     computation_init();
     gui_init();
 
-
-
     while (!q) { // Reading the user input while program isn't quited
 
         event ev = queue_pop();
@@ -237,7 +235,6 @@ void* main_thread(void *arg) { // Thread for reading an input from user keyboard
                 case EV_QUIT:
                     debug("Quit received");
                     process_pipe_message(&ev);
-
                     break;
                 case EV_GET_VERSION:
                     msg.type = MSG_GET_VERSION;
