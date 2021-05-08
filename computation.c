@@ -47,18 +47,6 @@ static struct {
         .grid_w = 640,
         .grid_h = 480,
 
-/*
-        .cur_x,
-        .cur_y,
-
-        .d_re,
-        .d_im,
-
-        .nbr_chunks,
-        .cid,
-        .chunk_re,
-        .chunk_im,
-*/
 
         .chunk_n_re = 64,
         .chunk_n_im = 48,
@@ -93,6 +81,7 @@ void enable_comp(void){comp.abort = false;}
 
 bool set_compute(message *msg){
     // myAssert msg!= null;
+    my_assert(msg != NULL, __func__ ,__LINE__, __FILE__);
     bool ret = !is_computing();
     if (ret){
         msg->type = MSG_SET_COMPUTE;
@@ -109,6 +98,7 @@ bool set_compute(message *msg){
 
 
 bool compute(message *msg){
+    my_assert(msg != NULL, __func__ ,__LINE__, __FILE__);
 
     if (!is_computing()) {
         comp.cid = 0;

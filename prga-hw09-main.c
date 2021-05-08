@@ -312,7 +312,7 @@ void process_pipe_message(event * const ev){
             if (is_done()){
                 info("Computation done");
             } else {
-                event event = { .type = EV_COMPUTE};
+                event event = { .type = EV_COMPUTE, .source = EV_KEYBOARD};
                 queue_push(event);
             }
             break;
