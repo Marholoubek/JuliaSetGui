@@ -1,9 +1,12 @@
-
+#include <SDL.h>
 
 #include "xwin_sdl.h"
 #include "utils.h"
 #include "computation.h"
+#include "event_queue.h"
 #include "gui.h"
+
+#define SDL_EVENT_WAIT_MS 100
 
 static struct {
     int w;
@@ -32,6 +35,48 @@ void gui_refresh(void){
     }
 
 }
+
+void *gui_win_thread(void*){
+    bool quit = false;
+    SDL_Event sdl_event;
+    event ev;
+    while (!quit){
+        ev.type = EV_TYPE_NUM;
+        if (SDL_PoolEvent(&sdl_event)){
+            if (sdl_event.type == SDL_KEYDOWN){
+                switch (sdl_event.key.keysym.sym) {
+                    case SDLK_q:
+                        ev.type = EV_QUIT; // TODO remove reading pipe
+                        break;
+                    case SDLK_s:
+                        ev.type = EV_SET_COMPUTE;
+                        break;
+                    case SDLK_a:
+                        ev.type = EV_ABORT;
+                        break;
+                    case SDLK_c:
+                        ev.type = EV_COMPUTE;
+                        break;
+
+                }
+            } else if (event.type == SDL_KEYUP){
+
+            } else{
+
+            }
+
+        }
+        if (ev.type != EV_TYPE_NUM){
+            queue_push(ev);
+        }
+        SDL_Delay(SDL_EVENT_WAIT_MS);
+
+
+        quit = is_quit();
+    }
+    return NULL;
+}
+
 
 
 // - function -----------------------------------------------------------------

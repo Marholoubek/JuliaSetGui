@@ -69,9 +69,9 @@ int main(int argc, char *argv[]) {
 
 
 
-    enum { INPUT_KB, INPUT_PIPE, MAIN_THREAD, NUM_THREADS }; // Creating an array of threads
-    const char *thread_names[] = { "Keyboard Input", "Pipe Input", "Main Thread"};
-    void* (*thr_functions[])(void*) = { input_thread_kb, input_thread_pipe, main_thread};
+    enum { INPUT_KB, INPUT_PIPE, MAIN_THREAD, WIN_THREAD, NUM_THREADS }; // Creating an array of threads
+    const char *thread_names[] = { "keyboard_thread", "pipe_input_thread", "main_thread", "gui_win_thread"};
+    void* (*thr_functions[])(void*) = { input_thread_kb, input_thread_pipe, main_thread, qui_win_thread };
     pthread_t threads[NUM_THREADS];
 
 
@@ -111,7 +111,6 @@ void* input_thread_kb(void *arg){ // Thread for reading an input from user keybo
     static int ret = 0;
     // data_t *data = (data_t*) arg;
     event ev;
-    ev.source = EV_KEYBOARD;
 
     bool q = false;
 
@@ -127,11 +126,23 @@ void* input_thread_kb(void *arg){ // Thread for reading an input from user keybo
             case 's':
                 ev.type = EV_SET_COMPUTE;
                 break;
-            case 'c':
+            case '1':
                 ev.type = EV_COMPUTE;
                 break;
+            case 'r':
+                ev.type = EV_RESET_CHUNK;
+                break;
+            case 'c':
+                ev.type = EV_COMPUTE_CPU;
+                break;
+            case 'p':
+                ev.type = EV_REFRESH;
+                break;
+            case 'l':
+                ev.type = EV_CLEAR_BUFFER;
+                break;
             default:
-                info("Keabord command is unknown");
+                info("This keyboard command is not specified");
                 break;
         }
         if (ev.type != EV_TYPE_NUM){
@@ -166,7 +177,7 @@ void* input_thread_pipe(void *arg){ // Thread for reading an input from pipe
                 if (get_message_size(c, &len)) {
                     msg_buf[i++] = c;
                 } else {
-                    fprintf(stderr, "Eroro unnown message");
+                    error("Unknown message received from module");
                 }
 
             } else { // read remaning bites
@@ -175,22 +186,20 @@ void* input_thread_pipe(void *arg){ // Thread for reading an input from pipe
             if (len > 0 && i == len){
                 message *msg = my_alloc(sizeof(message));
                 if (parse_message_buf(msg_buf, len, msg)){
-                    event ev = {.type = EV_PIPE_IN_MESSAGE, .source = EV_NUCLEO };
+                    event ev = { .type = EV_PIPE_IN_MESSAGE };
                     ev.data.msg = msg;
                     queue_push(ev);
                 } else {
-                    fprintf(stderr, "Eroro cannot parse message type");
+                    error("Message from pipe couldn't be parsed");
                     free(msg);
-
                 }
                 i = len = 0;
             }
-
         } else if (r == -1) {
             //error - quit
-            fprintf(stderr, "Eroro reading from pipe");
-            set_quit(); // TODO
-            event ev = {.type = EV_QUIT, .source = EV_NUCLEO};
+            error("Reading from pipe was unsuccessful");
+            set_quit();
+            event ev = { .type = EV_QUIT };
             queue_push(ev);
         }
         q = is_quit();
@@ -208,28 +217,13 @@ void* main_thread(void *arg) { // Thread for reading an input from user keyboard
     bool q = false;
 
 
-   /* struct {
-        uint16_t w; // resolution
-        uint16_t h; // resolution
-        bool computing;
-        // TODO: add necessary items
-    } computation = {
-            .w = 640, .h = 480
-    };
-    // TODO: create and initialize computation structure
-
-    // TODO: initialize GUI
-    */
-
-
     computation_init();
     gui_init();
 
-    while (!q) { // Reading the user input while program isn't quited
+    while (!q) {
 
         event ev = queue_pop();
         msg.type = MSG_NBR;
-        // xwin_poll_events(); //restore possible shadowed window in ubuntu by reading all pending window event
 
         switch (ev.type) {
             case EV_GET_VERSION:
@@ -247,17 +241,16 @@ void* main_thread(void *arg) { // Thread for reading an input from user keyboard
             case EV_ABORT:
                 msg.type = MSG_ABORT;
                 break;
-
             case EV_QUIT:
                 debug("Quit received");
-                process_pipe_message(&ev);
                 set_quit();
                 break;
             case EV_PIPE_IN_MESSAGE:
                 process_pipe_message(&ev);
                 break;
-            case MSG_STARTUP:
-                fprintf(stderr, "Startup message: %s\n",msg.data.startup.message);
+
+            case EV_RESET_CHUNK:
+
                 break;
             default:
                 debug("Unknown message");
@@ -291,6 +284,9 @@ void process_pipe_message(event * const ev){
     ev->type = EV_TYPE_NUM;
     const message *msg = ev->data.msg;
     switch (msg->type) {
+        case MSG_STARTUP:
+            fprintf(stderr, "Startup message: %s\n",msg.data.startup.message);
+            break;
         case MSG_OK:
             info("OK message from pipe");
             break;
@@ -303,7 +299,7 @@ void process_pipe_message(event * const ev){
             if (is_done()){
                 info("Computation done");
             } else {
-                event event = { .type = EV_COMPUTE, .source = EV_KEYBOARD};
+                event event = { .type = EV_COMPUTE };
                 info("Moving to another chunk");
                 queue_push(event);
             }
