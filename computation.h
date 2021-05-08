@@ -4,6 +4,9 @@
 #define __COMPUTATION_H__
 
 #include <stdbool.h>
+#include <stdio.h>
+#include <complex.h>
+
 #include "messages.h"
 
 
@@ -31,6 +34,9 @@ void update_data(const msg_compute_data *compute_data);
 bool reset_chunk(void);
 
 void buffer_cleanup(void);
+
+void my_compute(void);
+
 
 
 

@@ -64,8 +64,8 @@ static struct {
 
 void computation_init(void){
 
-    //comp.grid = my_alloc(comp.grid_w * comp.grid_h);
-    comp.grid = calloc(comp.grid_w * comp.grid_h, comp.grid_w * comp.grid_h); // TODO Validate
+    comp.grid = my_alloc(comp.grid_w * comp.grid_h);
+    // comp.grid = calloc(comp.grid_w * comp.grid_h, comp.grid_w * comp.grid_h); // TODO Validate
     comp.d_re = (comp.range_re_max - comp.range_re_min) / (1. * comp.grid_w);
     comp.d_im = -(comp.range_re_max - comp.range_re_min) / (1. * comp.grid_h);
     comp.nbr_chunks = (comp.grid_w * comp.grid_h) /  (comp.chunk_n_re * comp.chunk_n_im);
@@ -198,4 +198,22 @@ void buffer_cleanup(void){
     computation_cleanup();
     computation_init();
 }
+
+void my_compute(void){
+    complex double z, c;
+    int x, y, i;
+    for (y=0 ; y<639 ; ++y)
+    {
+        for (x=0 ; x<479 ; ++x)
+        {
+            c = -0.625 - 0.4*I;
+            z = (-2 + x*0.001) + (-2 + y*0.001)*I;
+            i = 0;
+            while (cabs(z) < 2 && ++i < 255) z = z*z + c;
+            comp.grid[y * 479 + x] = i / 255;
+        }
+        printf("\n");
+    }
+}
+
 

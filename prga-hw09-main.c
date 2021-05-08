@@ -270,6 +270,10 @@ void* main_thread(void *arg) { // Thread for reading an input from user keyboard
                 gui_refresh();
                 info("Gui refreshed");
                 break;
+            case EV_COMPUTE_CPU:
+                my_compute();
+                gui_refresh();
+                break;
             default:
                 debug("Unknown message");
                 break;

@@ -13,7 +13,7 @@ all: $(BINARIES)
 OBJS=$(patsubst %.c,%.o,$(wildcard *.c))
 
 prgsem-main: $(OBJS)
-	$(CC) $(OBJS) $(LDFLAGS) -o $@
+	$(CC) $(OBJS) $(LDFLAGS) -o $@ -lm
 
 $(OBJS): %.o: %.c
 	$(CC) -c $(CFLAGS) $< -o $@
