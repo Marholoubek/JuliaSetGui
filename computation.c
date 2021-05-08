@@ -33,6 +33,7 @@ static struct {
     bool computing;
     bool done;
     bool abort;
+    bool is_set;
 
 
 } comp = {
@@ -55,16 +56,19 @@ static struct {
         .computing = false,
         .done = false,
         .abort = false,
+        .is_set = false,
 
 
 
 };
 
 void computation_init(void){
+    comp.is_set = true;
     comp.grid = my_alloc(comp.grid_w * comp.grid_h);
     comp.d_re = (comp.range_re_max - comp.range_re_min) / (1. * comp.grid_w);
     comp.d_im = -(comp.range_re_max - comp.range_re_min) / (1. * comp.grid_h);
     comp.nbr_chunks = (comp.grid_w * comp.grid_h) /  (comp.chunk_n_re * comp.chunk_n_im);
+    printf("Computations parameters: w:%d, h:%d, chunks: %d\n", comp.grid_w, comp.grid_h, comp.nbr_chunks);
 
 }
 void computation_cleanup(void){
@@ -72,15 +76,27 @@ void computation_cleanup(void){
     comp.grid = NULL;
 }
 
+/*bool buffer_cleanup(void){
+    if (!is_computing()) {
+        comp.cid = 0;
+        comp.computing = true;
+        comp.cur_x = comp.cur_y = 0;
+        comp.chunk_re = comp.range_re_min;
+        comp.chunk_im = comp.range_im_max;
+        computation_cleanup();
+    }
+    return is_computing();
+}*/
+
 bool is_computing(void) {return comp.computing;}
 bool is_done(void) {return comp.done;}
 bool is_abort(void) {return comp.abort;}
+bool is_set(void){ return comp.is_set;}
 
 void abort_comp(void){comp.abort = true;}
 void enable_comp(void){comp.abort = false;}
 
 bool set_compute(message *msg){
-    // myAssert msg!= null;
     my_assert(msg != NULL, __func__ ,__LINE__, __FILE__);
     bool ret = !is_computing();
     if (ret){

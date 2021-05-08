@@ -234,9 +234,14 @@ void* main_thread(void *arg) { // Thread for reading an input from user keyboard
                 info( set_compute(&msg) ? "set compute" : "fail set compute");
                 break;
             case EV_COMPUTE:
-                enable_comp();
-                msg.type = MSG_COMPUTE;
-                info( compute(&msg) ? "compute" : "fail compute");
+                if (is_set()){
+                    enable_comp();
+                    msg.type = MSG_COMPUTE;
+                    info( compute(&msg) ? "compute" : "fail compute");
+                } else {
+                    warn("The computation isn't set yet. Hint: press 's' to set the computations parameters");
+                }
+
                 break;
             case EV_ABORT:
                 msg.type = MSG_ABORT;
@@ -252,10 +257,13 @@ void* main_thread(void *arg) { // Thread for reading an input from user keyboard
             case EV_RESET_CHUNK:
 
                 break;
+            case EV_CLEAR_BUFFER:
+                gui_buffer_cleanup();
+                gui_refresh();
+                break;
             default:
                 debug("Unknown message");
                 break;
-                // TODO: handle nucleo events
         }
 
 

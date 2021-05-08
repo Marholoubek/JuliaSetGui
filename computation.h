@@ -18,6 +18,7 @@ bool is_done(void);
 void abort_comp(void);
 void enable_comp(void);
 bool is_abort(void);
+bool is_set(void);
 
 bool set_compute(message *msg);
 bool compute(message *msg);
@@ -25,6 +26,8 @@ bool compute(message *msg);
 void update_image(int w, int h, unsigned char *img);
 
 void update_data(const msg_compute_data *compute_data);
+
+// bool buffer_cleanup(void);
 
 
 

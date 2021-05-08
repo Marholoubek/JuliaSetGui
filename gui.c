@@ -28,13 +28,22 @@ void gui_cleanup(void){
     xwin_close();
 }
 
+void gui_buffer_cleanup(void){
+    if (gui.img){
+        free(gui.img);
+        gui.img = gui.img = my_alloc(gui.w * gui.h * 3);
+    }
+}
+
+
 void gui_refresh(void){
     if (gui.img){
         update_image(gui.w, gui.h, gui.img);
         xwin_redraw(gui.w, gui.h, gui.img);
     }
-
 }
+
+
 
 void *gui_win_thread(void* arg){
     bool quit = false;
