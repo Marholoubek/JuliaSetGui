@@ -230,55 +230,44 @@ void* main_thread(void *arg) { // Thread for reading an input from user keyboard
         event ev = queue_pop();
         msg.type = MSG_NBR;
         // xwin_poll_events(); //restore possible shadowed window in ubuntu by reading all pending window event
-        if (ev.source == EV_KEYBOARD) {
-            switch (ev.type) {
-                case EV_QUIT:
-                    debug("Quit received");
-                    process_pipe_message(&ev);
-                    break;
-                case EV_GET_VERSION:
-                    msg.type = MSG_GET_VERSION;
-                    break;
-                case EV_SET_COMPUTE:
-                    msg.type = MSG_SET_COMPUTE;
-                    info( set_compute(&msg) ? "set compute" : "fail set compute");
-                    break;
-                case EV_COMPUTE:
-                    enable_comp();
-                    msg.type = MSG_COMPUTE;
-                    info( compute(&msg) ? "compute" : "fail compute");
-                    break;
-                case EV_ABORT:
-                    msg.type = MSG_ABORT;
-                    break;
-                default:
-                    debug("Unknown message");
-                    break;
-            }
-            // TODO: handle events from keyboard
-        } else if (ev.source == EV_NUCLEO) {
-            switch (ev.type) {
-                case EV_QUIT:
-                    debug("Quit received");
-                    process_pipe_message(&ev);
-                    set_quit();
-                    break;
-                case EV_PIPE_IN_MESSAGE:
-                    process_pipe_message(&ev);
-                default:
-                    break;
-                    // TODO: handle nucleo events
-            }
 
+        switch (ev.type) {
+            case EV_GET_VERSION:
+                msg.type = MSG_GET_VERSION;
+                break;
+            case EV_SET_COMPUTE:
+                msg.type = MSG_SET_COMPUTE;
+                info( set_compute(&msg) ? "set compute" : "fail set compute");
+                break;
+            case EV_COMPUTE:
+                enable_comp();
+                msg.type = MSG_COMPUTE;
+                info( compute(&msg) ? "compute" : "fail compute");
+                break;
+            case EV_ABORT:
+                msg.type = MSG_ABORT;
+                break;
 
-        } else {
-            fprintf(stderr, "source wasnt sepified");
+            case EV_QUIT:
+                debug("Quit received");
+                process_pipe_message(&ev);
+                set_quit();
+                break;
+            case EV_PIPE_IN_MESSAGE:
+                process_pipe_message(&ev);
+            default:
+                debug("Unknown message");
+                break;
+                // TODO: handle nucleo events
         }
+
+
+
         if (msg.type != MSG_NBR){
             // Do in my assert
             fill_message_buf(&msg, msg_buf, sizeof(message), &msg_len);
             if (write(data->out_pipe, msg_buf, msg_len) == msg_len) {
-                debug("sent data to pipe out");
+                debug("Sent message to pipe");
             } else {
                 info("send message fail"); // TODO eror form it
             }
@@ -289,8 +278,6 @@ void* main_thread(void *arg) { // Thread for reading an input from user keyboard
 
     gui_cleanup();
     computation_cleanup();
-
-    // xwin_close();
     return &ret;
 }
 
@@ -301,7 +288,7 @@ void process_pipe_message(event * const ev){
     const message *msg = ev->data.msg;
     switch (msg->type) {
         case MSG_OK:
-            info("OK");
+            info("OK message from pipe");
             break;
         case MSG_VERSION:
             fprintf(stderr, "Modelue wersion %d.%d-p%d\n", msg->data.version.major, msg->data.version.minor, msg->data.version.patch);
@@ -313,6 +300,7 @@ void process_pipe_message(event * const ev){
                 info("Computation done");
             } else {
                 event event = { .type = EV_COMPUTE, .source = EV_KEYBOARD};
+                info("Moving to another chunk");
                 queue_push(event);
             }
             break;
