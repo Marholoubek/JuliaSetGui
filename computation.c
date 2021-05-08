@@ -122,6 +122,7 @@ bool compute(message *msg){
     if (!is_computing()) {
         comp.cid = 0;
         comp.computing = true;
+        comp.done = false;
         comp.cur_x = comp.cur_y = 0;
         comp.chunk_re = comp.range_re_min;
         comp.chunk_im = comp.range_im_max;
@@ -140,7 +141,8 @@ bool compute(message *msg){
             }
             msg->type = MSG_COMPUTE;
         } else {
-            //everything is computed
+            comp.computing = false;
+            comp.done = true;
         }
     }
 
@@ -165,6 +167,7 @@ void update_data(const msg_compute_data *compute_data){
         if ((comp.cid + 1) >= comp.nbr_chunks && (compute_data->i_re + 1) == comp.chunk_n_re && (compute_data->i_im + 1) == comp.chunk_n_im){
             comp.done = true;
             comp.computing = false;
+            debug("I was here to set computing flase");
         }
     } else {
         error("Received chunk with unexpected chunk id");

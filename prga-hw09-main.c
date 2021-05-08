@@ -267,6 +267,7 @@ void* main_thread(void *arg) { // Thread for reading an input from user keyboard
                 break;
             case EV_REFRESH:
                 gui_refresh();
+                info("Gui refreshed");
                 break;
             default:
                 debug("Unknown message");
