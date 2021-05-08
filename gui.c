@@ -31,7 +31,9 @@ void gui_cleanup(void){
 void gui_buffer_cleanup(void){
     if (gui.img){
         free(gui.img);
+        gui.img = NULL;
         gui.img = my_calloc(gui.w * gui.h * 3);
+
         gui_refresh();
     }
 }

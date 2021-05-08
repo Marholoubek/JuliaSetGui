@@ -259,8 +259,7 @@ void* main_thread(void *arg) { // Thread for reading an input from user keyboard
                 break;
             case EV_CLEAR_BUFFER:
                 gui_buffer_cleanup();
-
-                info("Buffer was cleanup");
+                info("Buffer was cleandup");
                 break;
             default:
                 debug("Unknown message");
