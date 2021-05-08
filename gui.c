@@ -31,7 +31,9 @@ void gui_cleanup(void){
 void gui_buffer_cleanup(void){
     if (gui.img){
         free(gui.img);
-        gui.img = gui.img = my_alloc(gui.w * gui.h * 3);
+        gui.img = NULL;
+        get_grid_size(&gui.w, &gui.h);
+        gui.img = my_alloc(gui.w * gui.h * 3);
     }
 }
 

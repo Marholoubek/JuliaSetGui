@@ -63,7 +63,7 @@ static struct {
 };
 
 void computation_init(void){
-    comp.is_set = true;
+
     comp.grid = my_alloc(comp.grid_w * comp.grid_h);
     comp.d_re = (comp.range_re_max - comp.range_re_min) / (1. * comp.grid_w);
     comp.d_im = -(comp.range_re_max - comp.range_re_min) / (1. * comp.grid_h);
@@ -99,6 +99,7 @@ void enable_comp(void){comp.abort = false;}
 bool set_compute(message *msg){
     my_assert(msg != NULL, __func__ ,__LINE__, __FILE__);
     bool ret = !is_computing();
+    comp.is_set = true;
     if (ret){
         msg->type = MSG_SET_COMPUTE;
         msg->data.set_compute.c_re = comp.c_re;
