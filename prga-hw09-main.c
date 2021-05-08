@@ -260,6 +260,7 @@ void* main_thread(void *arg) { // Thread for reading an input from user keyboard
             case EV_CLEAR_BUFFER:
                 gui_buffer_cleanup();
                 gui_refresh();
+                info("Buffer was cleanup");
                 break;
             default:
                 debug("Unknown message");

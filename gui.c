@@ -34,6 +34,9 @@ void gui_buffer_cleanup(void){
         gui.img = NULL;
         get_grid_size(&gui.w, &gui.h);
         gui.img = my_alloc(gui.w * gui.h * 3);
+        SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderClear(renderer);
     }
 }
 

@@ -68,7 +68,6 @@ void computation_init(void){
     comp.d_re = (comp.range_re_max - comp.range_re_min) / (1. * comp.grid_w);
     comp.d_im = -(comp.range_re_max - comp.range_re_min) / (1. * comp.grid_h);
     comp.nbr_chunks = (comp.grid_w * comp.grid_h) /  (comp.chunk_n_re * comp.chunk_n_im);
-    printf("Computations parameters: w:%d, h:%d, chunks: %d\n", comp.grid_w, comp.grid_h, comp.nbr_chunks);
 
 }
 void computation_cleanup(void){
@@ -99,7 +98,7 @@ void enable_comp(void){comp.abort = false;}
 bool set_compute(message *msg){
     my_assert(msg != NULL, __func__ ,__LINE__, __FILE__);
     bool ret = !is_computing();
-    comp.is_set = true;
+
     if (ret){
         msg->type = MSG_SET_COMPUTE;
         msg->data.set_compute.c_re = comp.c_re;
@@ -108,6 +107,9 @@ bool set_compute(message *msg){
         msg->data.set_compute.d_im = comp.d_im;
         msg->data.set_compute.n = comp.n;
         comp.done = false;
+        comp.is_set = true;
+        printf("Computations parameters: w:%d, h:%d, chunks: %d\n", comp.grid_w, comp.grid_h, comp.nbr_chunks);
+
     }
 
     return ret;
