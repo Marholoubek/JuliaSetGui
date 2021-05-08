@@ -30,6 +30,9 @@ void update_data(const msg_compute_data *compute_data);
 
 bool reset_chunk(void);
 
+void buffer_cleanup(void);
+
+
 
 // bool buffer_cleanup(void);
 

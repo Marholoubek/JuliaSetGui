@@ -14,7 +14,6 @@ void *gui_win_thread(void* arg);
 // assigns color to calculated fractals
 void redraw(int w, int h, uint8_t *grid, uint8_t threshold, unsigned char *out);
 
-void gui_buffer_cleanup(void);
 
 
 

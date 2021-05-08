@@ -28,15 +28,7 @@ void gui_cleanup(void){
     xwin_close();
 }
 
-void gui_buffer_cleanup(void){
-    if (gui.img){
-        free(gui.img);
-        gui.img = NULL;
-        gui.img = my_calloc(gui.w * gui.h * 3);
 
-        gui_refresh();
-    }
-}
 
 
 void gui_refresh(void){
