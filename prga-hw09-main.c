@@ -255,11 +255,18 @@ void* main_thread(void *arg) { // Thread for reading an input from user keyboard
                 break;
 
             case EV_RESET_CHUNK:
-
+                if (!reset_chunk()){
+                    info("Chunk was resetted");
+                } else {
+                    info("Cant be reset while it's computing");
+                }
                 break;
             case EV_CLEAR_BUFFER:
                 gui_buffer_cleanup();
                 info("Buffer was cleandup");
+                break;
+            case EV_REFRESH:
+                gui_refresh();
                 break;
             default:
                 debug("Unknown message");

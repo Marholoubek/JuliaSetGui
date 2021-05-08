@@ -75,6 +75,16 @@ void computation_cleanup(void){
     comp.grid = NULL;
 }
 
+bool reset_chunk(void){
+    if (!is_computing()) {
+        comp.cid = 0;
+        comp.computing = true;
+        comp.cur_x = comp.cur_y = 0;
+        comp.chunk_re = comp.range_re_min;
+        comp.chunk_im = comp.range_im_max;
+    }
+    return is_computing();
+}
 
 
 bool is_computing(void) {return comp.computing;}

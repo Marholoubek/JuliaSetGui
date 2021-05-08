@@ -27,6 +27,10 @@ void update_image(int w, int h, unsigned char *img);
 
 void update_data(const msg_compute_data *compute_data);
 
+
+bool reset_chunk(void);
+
+
 // bool buffer_cleanup(void);
 
 
