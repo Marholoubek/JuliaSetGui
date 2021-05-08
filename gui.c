@@ -40,6 +40,7 @@ void gui_refresh(void){
 
 
 
+
 void *gui_win_thread(void* arg){
     bool quit = false;
     SDL_Event sdl_event;

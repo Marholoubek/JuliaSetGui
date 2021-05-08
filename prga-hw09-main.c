@@ -262,7 +262,8 @@ void* main_thread(void *arg) { // Thread for reading an input from user keyboard
                 }
                 break;
             case EV_CLEAR_BUFFER:
-                // TODO
+                buffer_cleanup();
+                gui_refresh();
                 info("Buffer was cleandup");
                 break;
             case EV_REFRESH:

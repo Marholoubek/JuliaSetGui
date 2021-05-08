@@ -194,6 +194,5 @@ void update_image(int w, int h, unsigned char *img){
 void buffer_cleanup(void){
     computation_cleanup();
     computation_init();
-    update_image();
 }
 
