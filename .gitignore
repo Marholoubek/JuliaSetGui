@@ -1,6 +1,6 @@
 CMakeLists.txt
 *.o
-prgsem-main
+
 cmake-build-debug
 
 .idea
