@@ -242,8 +242,8 @@ void my_compute(void){
     int im_range = (-1 * comp.range_im_min) + comp.range_im_max;
 
 
-    for (y = 0; y < h; ++y) {
-        for (x = 0; x < w; ++x) {
+    for (y = 0; y < w; ++y) {
+        for (x = 0; x < h; ++x) {
             z = (comp.range_re_min + x * (re_range / w)) + (comp.range_im_min + y * (im_range / h)) * I;
             i = 0;
             while (cabs(z) < 2 && ++i < n)
