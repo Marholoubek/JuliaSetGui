@@ -204,15 +204,13 @@ void my_compute(void){
     int x, y, i;
     for (y=0 ; y<639 ; ++y)
     {
-        for (x=0 ; x<479 ; ++x)
-        {
-            c = -0.625 - 0.4*I;
-            z = (-2 + x*0.001) + (-2 + y*0.001)*I;
+        for (x=0 ; x<479 ; ++x) {
+            c = -0.625 - 0.4 * I;
+            z = (-2 + x * (4/479)) + (-2 + y * (4/639)) * I;
             i = 0;
-            while (cabs(z) < 2 && ++i < 255) z = z*z + c;
+            while (cabs(z) < 2 && ++i < 255) z = z * z + c;
             comp.grid[y * 479 + x] = i / 255;
         }
-        printf("\n");
     }
 }
 

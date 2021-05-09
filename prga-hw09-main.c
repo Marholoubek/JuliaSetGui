@@ -273,6 +273,7 @@ void* main_thread(void *arg) { // Thread for reading an input from user keyboard
             case EV_COMPUTE_CPU:
                 my_compute();
                 gui_refresh();
+                info("Computed on PC");
                 break;
             default:
                 debug("Unknown message");
