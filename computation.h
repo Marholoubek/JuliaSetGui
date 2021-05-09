@@ -37,6 +37,9 @@ void buffer_cleanup(void);
 
 void my_compute(void);
 
+void redraw(int w, int h, uint8_t *grid, uint8_t threshold, unsigned char *out);
+
+
 
 
 

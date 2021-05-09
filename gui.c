@@ -84,27 +84,3 @@ void *gui_win_thread(void* arg){
 
 
 
-// - function -----------------------------------------------------------------
-void redraw(int w, int h, uint8_t *grid, uint8_t threshold, unsigned char *out)
-{
-    int nsize = w * h;
-    unsigned char *cur = out;
-    for (int i = 0; i < nsize; ++i)
-    {
-        const int n = *(grid++);
-        const double t = 1. * n / threshold;
-        if (t < threshold)
-        {
-            *(cur++) = (int)(9 * (1 - t) * t * t * t * 255);
-            *(cur++) = (int)(15 * (1 - t) * (1 - t) * t * t * 255);
-            *(cur++) = (int)(8.5 * (1 - t) * (1 - t) * (1 - t) * t * 255);
-        }
-        else
-        {
-            for (int j = 0; j < 3; ++j)
-            {
-                *(cur++) = 0;
-            }
-        }
-    }
-}

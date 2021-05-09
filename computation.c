@@ -183,14 +183,46 @@ void get_grid_size(int *w, int *h){
     *h = comp.grid_h;
 }
 
-void update_image(int w, int h, unsigned char *img){
-    my_assert(img && comp.grid && w == comp.grid_w && h == comp.grid_h, __func__ , __LINE__, __FILE__);
-    for (int i = 0; i < w * h; ++i){
+void update_image(int w, int h, unsigned char *img) {
+    my_assert(img && comp.grid && w == comp.grid_w && h == comp.grid_h, __func__, __LINE__, __FILE__);
+    for (int i = 0; i < w * h; ++i) {
         const double t = 1. * comp.grid[i] / (comp.n + 1.0);
-        *(img++) = 9 * (1-t)*t*t*t * 255;
-        *(img++) = 15 * (1-t)*(1-t)*t*t*255;
-        *(img++) = 8.5 *(1-t)*(1-t)*(1-t)*t*255;
-
+//        *(img++) = 9 * (1-t)*t*t*t * 255;
+//        *(img++) = 15 * (1-t)*(1-t)*t*t*255;
+//        *(img++) = 8.5 *(1-t)*(1-t)*(1-t)*t*255;
+        if (t < comp.n) {
+            *(img++) = (int) (9 * (1 - t) * t * t * t * 255);
+            *(img++) = (int) (15 * (1 - t) * (1 - t) * t * t * 255);
+            *(img++) = (int) (8.5 * (1 - t) * (1 - t) * (1 - t) * t * 255);
+        } else {
+            for (int j = 0; j < 3; ++j) {
+                *(img++) = 0;
+            }
+        }
+    }
+}
+// - function -----------------------------------------------------------------
+void redraw(int w, int h, uint8_t *grid, uint8_t threshold, unsigned char *out)
+{
+    int nsize = w * h;
+    unsigned char *cur = out;
+    for (int i = 0; i < nsize; ++i)
+    {
+        const int n = *(grid++);
+        const double t = 1. * n / threshold;
+        if (t < threshold)
+        {
+            *(cur++) = (int)(9 * (1 - t) * t * t * t * 255);
+            *(cur++) = (int)(15 * (1 - t) * (1 - t) * t * t * 255);
+            *(cur++) = (int)(8.5 * (1 - t) * (1 - t) * (1 - t) * t * 255);
+        }
+        else
+        {
+            for (int j = 0; j < 3; ++j)
+            {
+                *(cur++) = 0;
+            }
+        }
     }
 }
 
@@ -205,7 +237,6 @@ void my_compute(void){
     int w = 640;
     int h = 480;
     int n = 60;
-
 
     for (y = 0; y < h; ++y)
     {
