@@ -234,27 +234,24 @@ void buffer_cleanup(void){
 void my_compute(void){
     complex double z, c;
     int x, y, i;
-    int w = 640;
-    int h = 480;
-    int n = 60;
+    int w = comp.grid_w;
+    int h = comp.grid_h;
+    int n = comp.n;
+    c = comp.c_re + comp.c_im * I;
+    int re_range = (-1 * comp.range_re_min) + comp.range_re_max;
+    int im_range = (-1 * comp.range_im_min) + comp.range_im_max;
 
-    for (y = 0; y < h; ++y)
-    {
-        for (x = 0; x < w; ++x)
-        {
-            c = -0.625 - 0.4 * I;
-            // c = 0;
-            z = (-1.6 + x * (3.2 / w)) + (-1.1 + y * (2.2 / h)) * I;
-            // z = (-2 + x*0.001) + (-2 + y*0.001)*I;
+
+    for (y = 0; y < h; ++y) {
+        for (x = 0; x < w; ++x) {
+            z = (comp.range_re_min + x * (re_range / w)) + (comp.range_im_min + y * (im_range / h)) * I;
             i = 0;
             while (cabs(z) < 2 && ++i < n)
                 z = z * z + c;
             comp.grid[y * h + x] = i;
         }
-
     }
 }
 
-// comp.grid[y * 479 + x] = i / 255;
 
 
