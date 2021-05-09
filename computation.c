@@ -249,7 +249,7 @@ void my_compute(void){
             i = 0;
             while (cabs(z) < 2 && ++i < n)
                 z = z * z + c;
-            comp.grid[y * 479 + x] = i;
+            comp.grid[y * h + x] = i;
         }
 
     }
