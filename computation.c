@@ -202,16 +202,28 @@ void buffer_cleanup(void){
 void my_compute(void){
     complex double z, c;
     int x, y, i;
-    for (y=0 ; y<639 ; ++y)
+    int w = 640;
+    int h = 480;
+    int n = 60;
+
+
+    for (y = 0; y < h; ++y)
     {
-        for (x=0 ; x<479 ; ++x) {
+        for (x = 0; x < w; ++x)
+        {
             c = -0.625 - 0.4 * I;
-            z = (-2 + x * (4/479)) + (-2 + y * (4/639)) * I;
+            // c = 0;
+            z = (-1.6 + x * (3.2 / w)) + (-1.1 + y * (2.2 / h)) * I;
+            // z = (-2 + x*0.001) + (-2 + y*0.001)*I;
             i = 0;
-            while (cabs(z) < 2 && ++i < 255) z = z * z + c;
-            comp.grid[y * 479 + x] = i / 255;
+            while (cabs(z) < 2 && ++i < n)
+                z = z * z + c;
+            comp.grid[y * 479 + x] = i;
         }
+
     }
 }
+
+// comp.grid[y * 479 + x] = i / 255;
 
 
