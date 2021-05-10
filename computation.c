@@ -258,6 +258,7 @@ void my_compute(void){
     int w = 640;
     int h = 480;
     int n = 60;
+    int idx= 0;
     for (y = 0; y < h; ++y)
     {
         for (x = 0; x < w; ++x) {
@@ -266,7 +267,7 @@ void my_compute(void){
             i = 0;
             while (cabs(z) < 2 && ++i < n)
                 z = z * z + c;
-            comp.grid[y * h + x] = i;
+            comp.grid[idx++] = i;
             // printf("%4d", i);
         }
     }
