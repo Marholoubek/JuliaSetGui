@@ -229,6 +229,12 @@ void redraw(int w, int h, unsigned char *img)
 void buffer_cleanup(void){
     computation_cleanup();
     computation_init();
+    int i = 0;
+    for (y = 0; y < h; ++y) {
+        for (x = 0; x < w; ++x) {
+            comp.grid[i++] = 0;
+        }
+    }
 }
 
 void my_compute(void){
@@ -259,10 +265,10 @@ void my_compute(void){
     int h = comp.grid_h;
     int n = comp.n;
     c = comp.c_re + comp.c_im * I;
-    int range_re_min = comp.range_re_min;
-    int range_im_min = comp.range_im_min;
-    int range_re = -range_re_min + comp.range_re_max;
-    int range_im = -range_im_min + comp.range_im_max;
+    double range_re_min = comp.range_re_min;
+    double range_im_min = comp.range_im_min;
+    double range_re = -range_re_min + comp.range_re_max;
+    double range_im = -range_im_min + comp.range_im_max;
 
     for (y = 0; y < h; ++y) {
         for (x = 0; x < w; ++x) {
