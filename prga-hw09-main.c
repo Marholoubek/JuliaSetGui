@@ -112,11 +112,11 @@ void* input_thread_kb(void *arg){ // Thread for reading an input from user keybo
             case 'l':
                 ev.type = EV_CLEAR_BUFFER;
                 break;
-            case 'm':
-                ev.type = EV_SET_MANDELBROT;
+            case '2':
+                ev.type = EV_MOOD_2;
                 break;
             case 'o':
-                ev.type = EV_SET_ORIGINAL;
+                ev.type = EV_MOOD_1;
                 break;
             default:
                 warn("Unknown keyboard command. To see the command look at README.md file");
@@ -246,11 +246,11 @@ void* main_thread(void *arg) {
                 gui_refresh();
                 info("Computation on PC");
                 break;
-            case EV_SET_MANDELBROT: case EV_SET_ORIGINAL:
+            case EV_MOOD_1: case EV_MOOD_2:
                 if (!is_computing()){
-                    if (ev.type == EV_SET_MANDELBROT){
-                        set_parameters(0, 0, -2, -2, 2, 2);
-                    } else if (ev.type == EV_SET_ORIGINAL){
+                    if (ev.type == EV_MOOD_2){
+                        set_parameters(-0.9, 0, -2, -2, 2, 2);
+                    } else if (ev.type == EV_MOOD_1){
                         set_parameters(-0.4, 0.6, -1.6, -1.1, 1.6, 1.1);
                     }
                     msg.type = MSG_SET_COMPUTE;

@@ -34,8 +34,9 @@ typedef enum {
    EV_REFRESH,
    EV_PIPE_IN_MESSAGE,
    EV_TYPE_NUM,
-   EV_SET_MANDELBROT,
-   EV_SET_ORIGINAL,
+   EV_MOOD_1,
+   EV_MOOD_2,
+
 } event_type;
 
 typedef struct {
