@@ -58,8 +58,6 @@ static struct {
         .abort = false,
         .is_set = false,
 
-
-
 };
 
 void computation_init(void){
@@ -232,7 +230,7 @@ void buffer_cleanup(void){
 }
 
 void my_compute(void){
-    complex double z, c;
+    /*complex double z, c;
     int x, y, i;
     int w = comp.grid_w;
     int h = comp.grid_h;
@@ -249,6 +247,24 @@ void my_compute(void){
             while (cabs(z) < 2 && ++i < n)
                 z = z * z + c;
             comp.grid[y * h + x] = i;
+        }
+    }*/
+
+
+    complex double z, c;
+    int x, y, i;
+    int w = 640;
+    int h = 480;
+    int n = 60;
+    for (y = 0; y < h; ++y)
+    {
+        for (x = 0; x < w; ++x) {
+            c = -0.4 + 0.6 * I;
+            z = (-1.6 + x * (3.2 / w)) + (-1.1 + y * (2.2 / h)) * I;
+            i = 0;
+            while (cabs(z) < 2 && ++i < n)
+                z = z * z + c;
+            printf("%4d", i);
         }
     }
 }
