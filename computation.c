@@ -85,6 +85,10 @@ bool reset_chunk(void){
     return is_abort();
 }
 
+void move_back_one_chunk(void){
+    comp.cid--;
+}
+
 
 bool is_computing(void) {return comp.computing;}
 bool is_done(void) {return comp.done;}

@@ -245,6 +245,7 @@ void* main_thread(void *arg) { // Thread for reading an input from user keyboard
                 break;
             case EV_ABORT:
                 msg.type = MSG_ABORT;
+                move_back_one_chunk();
                 break;
             case EV_QUIT:
                 debug("Quit received");

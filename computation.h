@@ -32,6 +32,7 @@ void update_data(const msg_compute_data *compute_data);
 
 
 bool reset_chunk(void);
+void move_back_one_chunk(void);
 
 void buffer_cleanup(void);
 
