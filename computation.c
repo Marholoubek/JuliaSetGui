@@ -255,20 +255,22 @@ void my_compute(void){
 
     complex double z, c;
     int x, y, i;
-    int w = 640;
-    int h = 480;
-    int n = 60;
-    int idx= 0;
-    for (y = 0; y < h; ++y)
-    {
+    int w = comp.grid_w;
+    int h = comp.grid_h;
+    int n = comp.n;
+    c = comp.c_re + comp.c_im * I;
+    int range_re_min = comp.range_re_min;
+    int range_im_min = comp.range_im_min;
+    int range_re = -range_re_min + comp.range_re_max;
+    int range_im = -range_im_min + comp.range_im_max;
+
+    for (y = 0; y < h; ++y) {
         for (x = 0; x < w; ++x) {
-            c = -0.4 + 0.6 * I;
-            z = (-1.6 + x * (3.2 / w)) + (-1.1 + y * (2.2 / h)) * I;
+            z = (range_re_min + x * (range_re / w)) + (range_im_min + y * (range_im / h)) * I;
             i = 0;
             while (cabs(z) < 2 && ++i < n)
                 z = z * z + c;
-            comp.grid[idx++] = i;
-            // printf("%4d", i);
+            comp.grid[((h - 1 - y) * w) + x] = i;
         }
     }
 }
