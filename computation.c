@@ -229,9 +229,11 @@ void redraw(int w, int h, unsigned char *img)
 void buffer_cleanup(void){
     computation_cleanup();
     computation_init();
+    int w = comp.grid_w;
+    int h = comp.grid_h;
     int i = 0;
-    for (y = 0; y < h; ++y) {
-        for (x = 0; x < w; ++x) {
+    for (int y = 0; y < h; ++y) {
+        for (int x = 0; x < w; ++x) {
             comp.grid[i++] = 0;
         }
     }
