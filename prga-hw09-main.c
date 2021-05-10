@@ -1,17 +1,15 @@
 /*
  * File name: prga-hw09-main.c
- * Date:      2017/04/14 18:51
- * Author:    Jan Faigl
+ * Date:      2020/05/10 18:51
+ * Author:    Martin Holoubek
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <assert.h>
 #include <pthread.h>
 
-#include "xwin_sdl.h"
 
 #include "prg_io_nonblock.h"
 #include "messages.h"
@@ -20,8 +18,9 @@
 #include "computation.h"
 #include "gui.h"
 
+#ifndef READ_TIMEOUT_MS
 #define READ_TIMEOUT_MS 10 // Timeout for io_getc_timeout function
-
+#endif
 
 typedef struct { // Structure definition for carrying all the important variables
     int in_pipe;
@@ -29,14 +28,9 @@ typedef struct { // Structure definition for carrying all the important variable
 } data_t;
 
 
-
-
-
-
 void* input_thread_kb(void*);
 void* input_thread_pipe(void*);
 void* main_thread(void *arg);
-// TODO: add supporting threads functions
 
 void process_pipe_message(event * const ev);
 
@@ -53,28 +47,12 @@ int main(int argc, char *argv[]) {
     data.in_pipe = io_open_read(in);
     data.out_pipe = io_open_write(out);
 
-    if (data.in_pipe == -1) { // Pipes opening validation
-        fprintf(stderr, "Cannot open named pipe port %s\n", in); // TODO VALIDATE by MyAssert
-        exit(100);
-    }
-    if (data.out_pipe == -1) {
-        fprintf(stderr, "Cannot open named pipe port %s\n", out);
-        exit(100);
-    }
-
-
-	call_termios(0);
-
-
-
-
+    my_assert((data.in_pipe != -1 && data.out_pipe != -1), __func__, __LINE__, __FILE__);
 
     enum { INPUT_KB, INPUT_PIPE, MAIN_THREAD, WIN_THREAD, NUM_THREADS }; // Creating an array of threads
     const char *thread_names[] = { "keyboard_thread", "pipe_input_thread", "main_thread", "gui_win_thread"};
     void* (*thr_functions[])(void*) = { input_thread_kb, input_thread_pipe, main_thread, gui_win_thread };
     pthread_t threads[NUM_THREADS];
-
-
 
     for(int i = 0; i < NUM_THREADS; ++i) { // Creating them and checking for error
         int r = pthread_create(&threads[i], NULL, thr_functions[i], &data);
@@ -93,14 +71,8 @@ int main(int argc, char *argv[]) {
     io_close(data.in_pipe); // Closing the pipes properly
     io_close(data.out_pipe);
 
-
-
-
-
-	queue_cleanup();
-	call_termios(1); // restore terminal settings
-
-	return EXIT_SUCCESS;
+    queue_cleanup();
+	  return EXIT_SUCCESS;
 }
 
 
@@ -109,10 +81,9 @@ int main(int argc, char *argv[]) {
 void* input_thread_kb(void *arg){ // Thread for reading an input from user keyboard
     int c;
     static int ret = 0;
-    // data_t *data = (data_t*) arg;
     event ev;
-
     bool q = false;
+    call_termios(0);
 
     while (!q && (c = getchar()) != EOF && c != 'q') {
         ev.type = EV_TYPE_NUM;
@@ -148,7 +119,7 @@ void* input_thread_kb(void *arg){ // Thread for reading an input from user keybo
                 ev.type = EV_SET_ORIGINAL;
                 break;
             default:
-                info("This keyboard command is not specified");
+                warn("Unknown keyboard command. To see the command look at README.md file");
                 break;
         }
         if (ev.type != EV_TYPE_NUM){
@@ -156,6 +127,7 @@ void* input_thread_kb(void *arg){ // Thread for reading an input from user keybo
         }
         q = is_quit();
     }
+    call_termios(1); // restore terminal settings
     set_quit();
     ev.type = EV_QUIT;
     queue_push(ev);
@@ -170,7 +142,6 @@ void* input_thread_pipe(void *arg){ // Thread for reading an input from pipe
     uint8_t msg_buf[sizeof(message)];
     int i = 0;
     int len = 0;
-
     bool q = is_quit();
 
     while ((io_getc_timeout(data->in_pipe, READ_TIMEOUT_MS, &c)) > 0) {};
@@ -182,13 +153,10 @@ void* input_thread_pipe(void *arg){ // Thread for reading an input from pipe
                 len = 0;
                 if (get_message_size(c, &len)) {
                     msg_buf[i++] = c;
-                } else {
-                    error("Unknown message received from module");
-                }
+                } else error("Unknown message received from the module");
 
-            } else { // read remaning bites
-                msg_buf[i++] = c;
-            }
+            } else msg_buf[i++] = c;
+
             if (len > 0 && i == len){
                 message *msg = my_alloc(sizeof(message));
                 if (parse_message_buf(msg_buf, len, msg)){
@@ -196,7 +164,7 @@ void* input_thread_pipe(void *arg){ // Thread for reading an input from pipe
                     ev.data.msg = msg;
                     queue_push(ev);
                 } else {
-                    error("Message from pipe couldn't be parsed");
+                    error("The message from the pipe couldn't be parsed");
                     free(msg);
                 }
                 i = len = 0;
@@ -213,15 +181,13 @@ void* input_thread_pipe(void *arg){ // Thread for reading an input from pipe
     return &ret;
 }
 
-void* main_thread(void *arg) { // Thread for reading an input from user keyboard
-     // int c;
+void* main_thread(void *arg) {
     static int ret = 0;
     data_t *data = (data_t *) arg;
     message msg;
     uint8_t msg_buf[sizeof(message)];
     int msg_len;
     bool q = false;
-
 
     computation_init();
     gui_init();
@@ -237,40 +203,39 @@ void* main_thread(void *arg) { // Thread for reading an input from user keyboard
                 break;
             case EV_SET_COMPUTE:
                 msg.type = MSG_SET_COMPUTE;
-                info( set_compute(&msg) ? "set compute" : "fail set compute");
+                info( set_compute(&msg) ? "Computation parameters were set " : "Failed to set computations parameters");
                 break;
             case EV_COMPUTE:
                 if (is_set()){
                     enable_comp();
                     msg.type = MSG_COMPUTE;
-                    info( compute(&msg) ? "compute" : "fail compute");
+                    info( compute(&msg) ? "Computation started" : "Failed to start the computation");
                 } else {
-                    warn("The computation isn't set yet. Hint: press 's' to set the computations parameters");
+                    warn("The computation parameters aren't set yet. Hint: press 's' to set the computations parameters");
                 }
-
                 break;
             case EV_ABORT:
                 msg.type = MSG_ABORT;
+                info("Computation aborted");
                 break;
             case EV_QUIT:
-                debug("Quit received");
+                info("Quit received. Good Bay and have a nice day!");
                 set_quit();
                 break;
             case EV_PIPE_IN_MESSAGE:
                 process_pipe_message(&ev);
                 break;
-
             case EV_RESET_CHUNK:
-                if (!reset_chunk()){
-                    info("Chunk was resetted");
+                if (!reset_chunk()) {
+                    info("Chunk number has been reset");
                 } else {
-                    info("Cant be reset while it's computing");
+                    warn("You can't reset the chunk number while computing");
                 }
                 break;
             case EV_CLEAR_BUFFER:
                 buffer_cleanup();
                 gui_refresh();
-                info("Buffer was cleandup");
+                info("Buffer was cleaned");
                 break;
             case EV_REFRESH:
                 gui_refresh();
@@ -279,37 +244,35 @@ void* main_thread(void *arg) { // Thread for reading an input from user keyboard
             case EV_COMPUTE_CPU:
                 my_compute();
                 gui_refresh();
-                info("Computed on PC");
+                info("Computation on PC");
                 break;
-            case EV_SET_MANDELBROT:
+            case EV_SET_MANDELBROT: case EV_SET_ORIGINAL:
                 if (!is_computing()){
-                    set_parameters(0, 0, -2, -2, 2, 2);
-                } else warn("You can't set new parameters while computing");
-                break;
-            case EV_SET_ORIGINAL:
-                if (!is_computing()){
-                    set_parameters(-0.4, 0.6, -1.6, -1.1, 1.6, 1.1);
+                    if (ev.type == EV_SET_MANDELBROT){
+                        set_parameters(0, 0, -2, -2, 2, 2);
+                    } else if (ev.type == EV_SET_ORIGINAL){
+                        set_parameters(-0.4, 0.6, -1.6, -1.1, 1.6, 1.1);
+                    }
+                    msg.type = MSG_SET_COMPUTE;
+                    info( set_compute(&msg) ? "Computation parameters were set " : "Failed to set computations parameters");
+
                 } else warn("You can't set new parameters while computing");
                 break;
             default:
-                debug("Unknown message");
+                debug("Unknown event in main thread");
                 break;
         }
 
 
 
         if (msg.type != MSG_NBR){
-            // Do in my assert
             fill_message_buf(&msg, msg_buf, sizeof(message), &msg_len);
             if (write(data->out_pipe, msg_buf, msg_len) == msg_len) {
-                debug("Sent message to pipe");
-            } else {
-                info("send message fail"); // TODO eror form it
-            }
+                info("Sent message to pipe");
+            } else info("Failed to send message to pipe");
         }
         q = is_quit();
     }
-
 
     gui_cleanup();
     computation_cleanup();
@@ -318,7 +281,6 @@ void* main_thread(void *arg) { // Thread for reading an input from user keyboard
 
 
 void process_pipe_message(event * const ev){
-    // do my Assert
     ev->type = EV_TYPE_NUM;
     const message *msg = ev->data.msg;
     switch (msg->type) {
@@ -326,25 +288,26 @@ void process_pipe_message(event * const ev){
             fprintf(stderr, "Startup message: %s\n",msg->data.startup.message);
             break;
         case MSG_OK:
-            info("OK message from pipe");
+            info("Message 'OK' came form the pipe");
             break;
         case MSG_VERSION:
-            fprintf(stderr, "Modelue wersion %d.%d-p%d\n", msg->data.version.major, msg->data.version.minor, msg->data.version.patch);
+            fprintf(stderr, "Module version %d.%d-p%d\n", msg->data.version.major, msg->data.version.minor, msg->data.version.patch);
             break;
         case MSG_DONE:
-            info("Message done");
+            info("Message 'DONE' came form the pipe");
             gui_refresh();
             if (is_done()){
                 info("Computation done");
             } else {
                 event event = { .type = EV_COMPUTE };
-                info("Moving to another chunk");
                 queue_push(event);
+                info("Computing another chunk");
             }
             break;
         case MSG_ABORT:
-            info("Computation aborted");
             abort_comp();
+            move_chunk_back();
+            info("Computation aborted");
             break;
         case MSG_COMPUTE_DATA:
             if (!is_abort()) {
@@ -352,15 +315,12 @@ void process_pipe_message(event * const ev){
             }
             break;
         default:
-            fprintf(stderr, "unknown message type in process pipi func\n");;
+            debug("Unknown message from the pipe was tried to be processed");
             break;
-        
     }
     free(ev->data.msg);
     ev->data.msg = NULL;
 
-
 }
-
 
 /* end of prga-hw09-main.c */

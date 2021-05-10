@@ -138,7 +138,6 @@ bool compute(message *msg){
                 comp.cur_y += comp.chunk_n_im;
                 comp.chunk_re = comp.range_re_min;
                 comp.chunk_im += comp.chunk_n_im * comp.d_im;
-
             }
             msg->type = MSG_COMPUTE;
         } else {
@@ -157,6 +156,13 @@ bool compute(message *msg){
     }
 
     return is_computing();
+}
+
+void move_chunk_back(void){
+    if (comp.cid >= 2){
+        comp.cid -= 2;
+    } else comp.cid = 0;
+
 }
 
 void update_data(const msg_compute_data *compute_data){
@@ -185,9 +191,7 @@ void update_image(int w, int h, unsigned char *img) {
     my_assert(img && comp.grid && w == comp.grid_w && h == comp.grid_h, __func__, __LINE__, __FILE__);
     for (int i = 0; i < w * h; ++i) {
         const double t = 1. * comp.grid[i] / (comp.n + 1.0);
-//        *(img++) = 9 * (1-t)*t*t*t * 255;
-//        *(img++) = 15 * (1-t)*(1-t)*t*t*255;
-//        *(img++) = 8.5 *(1-t)*(1-t)*(1-t)*t*255;
+
         if (t < comp.n) {
             *(img++) = (int) (9 * (1 - t) * t * t * t * 255);
             *(img++) = (int) (15 * (1 - t) * (1 - t) * t * t * 255);
@@ -291,7 +295,6 @@ void set_parameters(double c_re, double c_im, double r_re_min, double r_im_min, 
     comp.range_im_min = r_im_min;
     comp.range_re_max = r_re_max;
     comp.range_im_max = r_im_max;
-    printf("Computations values: c = %3f + %3fj, Intervals: %3f + %3fj and %3f + %3fj,\n", comp.c_re, comp.c_im, comp.range_re_min, comp.range_im_min, comp.range_re_max, comp.range_im_max);
 }
 
 
