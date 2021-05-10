@@ -200,10 +200,12 @@ void update_image(int w, int h, unsigned char *img) {
     }
 }
 // - function -----------------------------------------------------------------
-void redraw(int w, int h, uint8_t *grid, uint8_t threshold, unsigned char *out)
+void redraw(int w, int h, unsigned char *img)
 {
+    uint8_t *grid = comp.grid;
+    int threshold = comp.n;
     int nsize = w * h;
-    unsigned char *cur = out;
+    unsigned char *cur = img;
     for (int i = 0; i < nsize; ++i)
     {
         const int n = *(grid++);
@@ -264,7 +266,8 @@ void my_compute(void){
             i = 0;
             while (cabs(z) < 2 && ++i < n)
                 z = z * z + c;
-            printf("%4d", i);
+            comp.grid[y * h + x] = i;
+            // printf("%4d", i);
         }
     }
 }

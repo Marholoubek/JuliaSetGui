@@ -38,6 +38,12 @@ void gui_refresh(void){
     }
 }
 
+void my_gui_refresh(void){
+    if (gui.img){
+        redraw(gui.w, gui.h, gui.img);
+        xwin_redraw(gui.w, gui.h, gui.img);
+    }
+}
 
 
 
