@@ -85,9 +85,7 @@ bool reset_chunk(void){
     return is_abort();
 }
 
-void move_back_one_chunk(void){
-    comp.cid--;
-}
+
 
 
 bool is_computing(void) {return comp.computing;}
@@ -112,7 +110,7 @@ bool set_compute(message *msg){
         comp.done = false;
         comp.is_set = true;
         printf("Computations parameters: w:%d, h:%d, chunks: %d\n", comp.grid_w, comp.grid_h, comp.nbr_chunks);
-
+        printf("Computations values: c = %3f + %3fj, Intervals: %3f + %3fj and %3f + %3fj,\n", comp.c_re, comp.c_im, comp.range_re_min, comp.range_im_min, comp.range_re_max, comp.range_im_max);
     }
 
     return ret;
@@ -147,7 +145,6 @@ bool compute(message *msg){
             comp.computing = false;
             comp.done = true;
             comp.abort = false;
-            debug("Yes byby I was here");
         }
     }
 
@@ -172,7 +169,6 @@ void update_data(const msg_compute_data *compute_data){
         if ((comp.cid + 1) >= comp.nbr_chunks && (compute_data->i_re + 1) == comp.chunk_n_re && (compute_data->i_im + 1) == comp.chunk_n_im){
             comp.done = true;
             comp.computing = false;
-            debug("I was here to set computing flase");
         }
     } else {
         error("Received chunk with unexpected chunk id");
@@ -286,6 +282,18 @@ void my_compute(void){
         }
     }
 }
+
+
+void set_parameters(double c_re, double c_im, double r_re_min, double r_im_min, double r_re_max, double r_im_max){
+    comp.c_im = c_im;
+    comp.c_re = c_re;
+    comp.range_re_min = r_re_min;
+    comp.range_im_min = r_im_min;
+    comp.range_re_max = r_re_max;
+    comp.range_im_max = r_im_max;
+    printf("Computations values: c = %3f + %3fj, Intervals: %3f + %3fj and %3f + %3fj,\n", comp.c_re, comp.c_im, comp.range_re_min, comp.range_im_min, comp.range_re_max, comp.range_im_max);
+}
+
 
 
 

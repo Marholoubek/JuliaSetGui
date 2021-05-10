@@ -66,6 +66,9 @@ void *gui_win_thread(void* arg){
                         ev.type = EV_ABORT;
                         break;
                     case SDLK_c:
+                        ev.type = EV_COMPUTE_CPU;
+                        break;
+                    case SDLK_1:
                         ev.type = EV_COMPUTE;
                         break;
 

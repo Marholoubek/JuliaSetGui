@@ -141,6 +141,12 @@ void* input_thread_kb(void *arg){ // Thread for reading an input from user keybo
             case 'l':
                 ev.type = EV_CLEAR_BUFFER;
                 break;
+            case 'm':
+                ev.type = EV_SET_MANDELBROT;
+                break;
+            case 'o':
+                ev.type = EV_SET_ORIGINAL;
+                break;
             default:
                 info("This keyboard command is not specified");
                 break;
@@ -245,7 +251,6 @@ void* main_thread(void *arg) { // Thread for reading an input from user keyboard
                 break;
             case EV_ABORT:
                 msg.type = MSG_ABORT;
-                move_back_one_chunk();
                 break;
             case EV_QUIT:
                 debug("Quit received");
@@ -275,6 +280,16 @@ void* main_thread(void *arg) { // Thread for reading an input from user keyboard
                 my_compute();
                 gui_refresh();
                 info("Computed on PC");
+                break;
+            case EV_SET_MANDELBROT:
+                if (!is_computing()){
+                    set_parameters(0, 0, -2, -2, 2, 2);
+                } else warn("You can't set new parameters while computing");
+                break;
+            case EV_SET_ORIGINAL:
+                if (!is_computing()){
+                    set_parameters(-0.4, 0.6, -1.6, -1.1, 1.6, 1.1);
+                } else warn("You can't set new parameters while computing");
                 break;
             default:
                 debug("Unknown message");
