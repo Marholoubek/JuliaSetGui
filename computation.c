@@ -274,25 +274,21 @@ void set_parameters(double c_re, double c_im, double r_re_min, double r_im_min, 
     comp.range_im_max = r_im_max;
 }
 
-void zoom(void){
-    comp.range_re_min /= 2;
-    comp.range_im_min /= 2;
-    comp.range_re_max /= 2;
-    comp.range_im_max /= 2;
-
-}
-void decrease_zoom(void){
-    if (comp.range_re_min > -2 && comp.range_im_min > -2 && comp.range_re_max < 2 && comp.range_im_max < 2){
-        comp.range_re_min *= 2;
-        comp.range_im_min *= 2;
-        comp.range_re_max *= 2;
-        comp.range_im_max *= 2;
-    } else {
+void zoom(int i){
+    double range_re = (-comp.range_re_min + comp.range_re_max) / 4;
+    double range_im = (-comp.range_im_min + comp.range_im_max) / 4;
+    if (comp.range_re_min > -2 && comp.range_im_min > -2 && comp.range_re_max < 2 && comp.range_im_max < 2) {
+        comp.range_re_min += (i)*range_re;
+        comp.range_im_min += (i)*range_im;
+        comp.range_re_max += (i)*range_re;
+        comp.range_im_max += (i)*range_im;
+    }else {
         comp.range_re_min = -2;
         comp.range_im_min = -2;
         comp.range_re_max = 2;
         comp.range_im_max = 2;
     }
+
 
 }
 void move(char c){
@@ -319,19 +315,7 @@ void move(char c){
     }
 }
 
-void switch_full_hd(void){
-    if (!comp.is_hd){
-        comp.grid_w *= 2,
-        comp.grid_h *= 2,
-        comp.chunk_n_re *= 2,
-        comp.chunk_n_im *= 2,
-        comp.n *= 2;
-        comp.is_hd = true;
-        info("Switched to HD");
-    } else {
-        warn("You are already at full HD mood");
-    }
-}
+
 
 
 

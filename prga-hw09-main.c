@@ -150,9 +150,7 @@ void* input_thread_kb(void *arg){ // Thread for reading an input from user keybo
             case '6':
                 ev.type = EV_MOOD_6;
                 break;
-            case 'f':
-                ev.type = EV_FULL_HD;
-                break;
+
 
             default:
                 warn("Unknown keyboard command. To see the command look at README.md file");
@@ -315,11 +313,11 @@ void* main_thread(void *arg) {
                 if (!is_computing()){
                     switch (e) {
                         case EV_ZOOM:
-                            zoom();
+                            zoom(-1);
                             info("Zoom");
                             break;
                         case EV_DECREASE_ZOOM:
-                            decrease_zoom();
+                            zoom(1);
                             info("Decrease zoom");
                             break;
                         case EV_MOVE_L:
@@ -345,11 +343,8 @@ void* main_thread(void *arg) {
 
                 } else warn("You can't set new parameters while computing");
                 break;
-            case EV_FULL_HD:
-                gui_cleanup();
-                switch_full_hd();
-                gui_init();
-                break;
+
+
             default:
                 debug("Unknown event in main thread");
                 break;
