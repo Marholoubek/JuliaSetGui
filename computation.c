@@ -165,12 +165,12 @@ void move_chunk_back(void){
         comp.cid -= 1;
         comp.cur_x -= comp.chunk_n_re;
         comp.chunk_re -= comp.chunk_n_re * comp.d_re;
-        if (comp.cur_x >= comp.grid_w) {
+        /*if (comp.cur_x >= comp.grid_w) {
             comp.cur_x = 0;
             comp.cur_y -= comp.chunk_n_im;
             comp.chunk_re = comp.range_re_min;
             comp.chunk_im -= comp.chunk_n_im * comp.d_im;
-        }
+        }*/
     }
 }
 
@@ -277,11 +277,11 @@ void set_parameters(double c_re, double c_im, double r_re_min, double r_im_min, 
 void zoom(int i){
     double range_re = (-comp.range_re_min + comp.range_re_max) / 4;
     double range_im = (-comp.range_im_min + comp.range_im_max) / 4;
-    if (comp.range_re_min > -2 && comp.range_im_min > -2 && comp.range_re_max < 2 && comp.range_im_max < 2) {
+    if (comp.range_re_min >= -2 && comp.range_im_min >= -2 && comp.range_re_max <= 2 && comp.range_im_max <= 2) {
         comp.range_re_min += (i)*range_re;
         comp.range_im_min += (i)*range_im;
-        comp.range_re_max += (i)*range_re;
-        comp.range_im_max += (i)*range_im;
+        comp.range_re_max -= (i)*range_re;
+        comp.range_im_max -= (i)*range_im;
     }else {
         comp.range_re_min = -2;
         comp.range_im_min = -2;

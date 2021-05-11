@@ -313,11 +313,11 @@ void* main_thread(void *arg) {
                 if (!is_computing()){
                     switch (e) {
                         case EV_ZOOM:
-                            zoom(-1);
+                            zoom(1);
                             info("Zoom");
                             break;
                         case EV_DECREASE_ZOOM:
-                            zoom(1);
+                            zoom(-1);
                             info("Decrease zoom");
                             break;
                         case EV_MOVE_L:
