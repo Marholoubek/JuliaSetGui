@@ -282,10 +282,18 @@ void zoom(void){
 
 }
 void decrease_zoom(void){
-    comp.range_re_min *= 2;
-    comp.range_im_min *= 2;
-    comp.range_re_max *= 2;
-    comp.range_im_max *= 2;
+    if (comp.range_re_min > -2 && comp.range_im_min > -2 && comp.range_re_max < 2 && comp.range_im_max < 2){
+        comp.range_re_min *= 2;
+        comp.range_im_min *= 2;
+        comp.range_re_max *= 2;
+        comp.range_im_max *= 2;
+    } else {
+        comp.range_re_min = -2;
+        comp.range_im_min = -2;
+        comp.range_re_max = 2;
+        comp.range_im_max = 2;
+    }
+
 }
 void move(char c){
 

@@ -150,6 +150,9 @@ void* input_thread_kb(void *arg){ // Thread for reading an input from user keybo
             case '6':
                 ev.type = EV_MOOD_6;
                 break;
+            case 'f':
+                ev.type = EV_FULL_HD;
+                break;
 
             default:
                 warn("Unknown keyboard command. To see the command look at README.md file");
@@ -351,8 +354,6 @@ void* main_thread(void *arg) {
                 debug("Unknown event in main thread");
                 break;
         }
-
-
 
         if (msg.type != MSG_NBR){
             fill_message_buf(&msg, msg_buf, sizeof(message), &msg_len);
