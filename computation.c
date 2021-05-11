@@ -34,6 +34,7 @@ static struct {
     bool done;
     bool abort;
     bool is_set;
+    bool is_hd;
 
 
 } comp = {
@@ -57,6 +58,8 @@ static struct {
         .done = false,
         .abort = false,
         .is_set = false,
+        .is_hd = false,
+
 
 };
 
@@ -247,6 +250,7 @@ void my_compute(void){
     double range_re = -range_re_min + comp.range_re_max;
     double range_im = -range_im_min + comp.range_im_max;
 
+    comp.computing = true;
     for (y = 0; y < h; ++y) {
         for (x = 0; x < w; ++x) {
             z = (range_re_min + x * (range_re / w)) + (range_im_min + y * (range_im / h)) * I;
@@ -256,6 +260,8 @@ void my_compute(void){
             comp.grid[((h - 1 - y) * w) + x] = i;
         }
     }
+    comp.computing = false;
+
 }
 
 
@@ -284,7 +290,7 @@ void decrease_zoom(void){
 void move(char c){
 
     double range_re = (-comp.range_re_min + comp.range_re_max) / 4;
-    double range_im = -comp.range_im_min + comp.range_im_max / 4;
+    double range_im = (-comp.range_im_min + comp.range_im_max) / 4;
     switch (c) {
         case 'u':
             comp.range_im_min += range_im;
@@ -303,7 +309,20 @@ void move(char c){
             comp.range_re_max += range_re;
             break;
     }
+}
 
+void switch_full_hd(void){
+    if (!comp.is_hd){
+        comp.grid_w *= 2,
+        comp.grid_h *= 2,
+        comp.chunk_n_re *= 2,
+        comp.chunk_n_im *= 2,
+        comp.n *= 2;
+        comp.is_hd = true;
+        info("Switched to HD");
+    } else {
+        warn("You are already at full HD mood");
+    }
 }
 
 

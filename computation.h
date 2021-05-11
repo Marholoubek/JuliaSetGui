@@ -44,6 +44,8 @@ void set_parameters(double c_re, double c_im, double r_re_min, double r_im_min, 
 void zoom(void);
 void decrease_zoom(void);
 void move(char c);
+void switch_full_hd(void);
+
 
 
 

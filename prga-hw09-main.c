@@ -123,10 +123,10 @@ void* input_thread_kb(void *arg){ // Thread for reading an input from user keybo
             case 'd':
                 ev.type = EV_MOVE_D;
                 break;
-            case 'm':
+            case 'n':
                 ev.type = EV_MOVE_L;
                 break;
-            case 'n':
+            case 'm':
                 ev.type = EV_MOVE_R;
                 break;
             case 'u':
@@ -229,8 +229,10 @@ void* main_thread(void *arg) {
 
         event ev = queue_pop();
         msg.type = MSG_NBR;
+        int e = ev.type;
 
-        switch (ev.type) {
+
+        switch (e) {
             case EV_GET_VERSION:
                 msg.type = MSG_GET_VERSION;
                 break;
@@ -282,7 +284,6 @@ void* main_thread(void *arg) {
                 break;
             case EV_MOOD_O: case EV_MOOD_2: case EV_MOOD_3: case EV_MOOD_4: case EV_MOOD_5: case EV_MOOD_6:
                 if (!is_computing()){
-                    int e = ev.type;
                     switch (e) {
                         case EV_MOOD_O:
                             set_parameters(-0.4, 0.6, -1.6, -1.1, 1.6, 1.1);
@@ -307,35 +308,44 @@ void* main_thread(void *arg) {
                     info( set_compute(&msg) ? "Computation parameters were set " : "Failed to set computations parameters");
                 } else warn("You can't set new parameters while computing");
                 break;
-            case EV_ZOOM:
+            case EV_ZOOM: case EV_DECREASE_ZOOM: case EV_MOVE_L:case EV_MOVE_R:case EV_MOVE_U:case EV_MOVE_D:
                 if (!is_computing()){
-                    zoom();
-                } else warn("You can't zoom while computing");
+                    switch (e) {
+                        case EV_ZOOM:
+                            zoom();
+                            info("Zoom");
+                            break;
+                        case EV_DECREASE_ZOOM:
+                            decrease_zoom();
+                            info("Decrease zoom");
+                            break;
+                        case EV_MOVE_L:
+                            move('l');
+                            info("Move left");
+                            break;
+                        case EV_MOVE_R:
+                            move('r');
+                            info("Move right");
+                            break;
+                        case EV_MOVE_U:
+                            move('u');
+                            info("Move up");
+                            break;
+                        case EV_MOVE_D:
+                            move('d');
+                            info("Move down");
+                            break;
+                    }
+                    my_compute();
+                    gui_refresh();
+                    info("Computation on PC");
+
+                } else warn("You can't set new parameters while computing");
                 break;
-            case EV_DECREASE_ZOOM:
-                if (!is_computing()){
-                    decrease_zoom();
-                } else warn("You can't decrease zoom while computing");
-                break;
-            case EV_MOVE_L:
-                if (!is_computing()){
-                    move('l');
-                } else warn("You can't move parameters while computing");
-                break;
-            case EV_MOVE_R:
-                if (!is_computing()){
-                    move('r');
-                } else warn("You can't move parameters while computing");
-                break;
-            case EV_MOVE_U:
-                if (!is_computing()){
-                    move('u');
-                } else warn("You can't move parameters while computing");
-                break;
-            case EV_MOVE_D:
-                if (!is_computing()){
-                    move('d');
-                } else warn("You can't move parameters while computing");
+            case EV_FULL_HD:
+                gui_cleanup();
+                switch_full_hd();
+                gui_init();
                 break;
             default:
                 debug("Unknown event in main thread");

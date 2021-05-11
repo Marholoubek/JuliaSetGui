@@ -46,6 +46,7 @@ typedef enum {
    EV_MOOD_4,
    EV_MOOD_5,
    EV_MOOD_6,
+   EV_FULL_HD,
 
 } event_type;
 
