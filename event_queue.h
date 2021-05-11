@@ -34,8 +34,18 @@ typedef enum {
    EV_REFRESH,
    EV_PIPE_IN_MESSAGE,
    EV_TYPE_NUM,
-   EV_MOOD_1,
+   EV_ZOOM,
+   EV_DECREASE_ZOOM,
+   EV_MOVE_L,
+   EV_MOVE_R,
+   EV_MOVE_D,
+   EV_MOVE_U,
+   EV_MOOD_O,
    EV_MOOD_2,
+   EV_MOOD_3,
+   EV_MOOD_4,
+   EV_MOOD_5,
+   EV_MOOD_6,
 
 } event_type;
 

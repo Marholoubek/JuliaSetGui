@@ -63,7 +63,6 @@ static struct {
 void computation_init(void){
 
     comp.grid = my_alloc(comp.grid_w * comp.grid_h);
-    // comp.grid = calloc(comp.grid_w * comp.grid_h, comp.grid_w * comp.grid_h); // TODO Validate
     comp.d_re = (comp.range_re_max - comp.range_re_min) / (1. * comp.grid_w);
     comp.d_im = -(comp.range_re_max - comp.range_re_min) / (1. * comp.grid_h);
     comp.nbr_chunks = (comp.grid_w * comp.grid_h) /  (comp.chunk_n_re * comp.chunk_n_im);
@@ -159,10 +158,17 @@ bool compute(message *msg){
 }
 
 void move_chunk_back(void){
-    if (comp.cid >= 2){
-        comp.cid -= 2;
-    } else comp.cid = 0;
-
+    if (comp.cid > 0 && comp.cid < comp.nbr_chunks){
+        comp.cid -= 1;
+        comp.cur_x -= comp.chunk_n_re;
+        comp.chunk_re -= comp.chunk_n_re * comp.d_re;
+        if (comp.cur_x >= comp.grid_w) {
+            comp.cur_x = 0;
+            comp.cur_y -= comp.chunk_n_im;
+            comp.chunk_re = comp.range_re_min;
+            comp.chunk_im -= comp.chunk_n_im * comp.d_im;
+        }
+    }
 }
 
 void update_data(const msg_compute_data *compute_data){
@@ -187,22 +193,7 @@ void get_grid_size(int *w, int *h){
     *h = comp.grid_h;
 }
 
-void update_image(int w, int h, unsigned char *img) {
-    my_assert(img && comp.grid && w == comp.grid_w && h == comp.grid_h, __func__, __LINE__, __FILE__);
-    for (int i = 0; i < w * h; ++i) {
-        const double t = 1. * comp.grid[i] / (comp.n + 1.0);
 
-        if (t < comp.n) {
-            *(img++) = (int) (9 * (1 - t) * t * t * t * 255);
-            *(img++) = (int) (15 * (1 - t) * (1 - t) * t * t * 255);
-            *(img++) = (int) (8.5 * (1 - t) * (1 - t) * (1 - t) * t * 255);
-        } else {
-            for (int j = 0; j < 3; ++j) {
-                *(img++) = 0;
-            }
-        }
-    }
-}
 // - function -----------------------------------------------------------------
 void redraw(int w, int h, unsigned char *img)
 {
@@ -244,26 +235,6 @@ void buffer_cleanup(void){
 }
 
 void my_compute(void){
-    /*complex double z, c;
-    int x, y, i;
-    int w = comp.grid_w;
-    int h = comp.grid_h;
-    int n = comp.n;
-    c = comp.c_re + comp.c_im * I;
-    int re_range = (-1 * comp.range_re_min) + comp.range_re_max;
-    int im_range = (-1 * comp.range_im_min) + comp.range_im_max;
-
-
-    for (y = 0; y < h; ++y) {
-        for (x = 0; x < w; ++x) {
-            z = (comp.range_re_min + x * (re_range / w)) + (comp.range_im_min + y * (im_range / h)) * I;
-            i = 0;
-            while (cabs(z) < 2 && ++i < n)
-                z = z * z + c;
-            comp.grid[y * h + x] = i;
-        }
-    }*/
-
 
     complex double z, c;
     int x, y, i;
@@ -295,6 +266,44 @@ void set_parameters(double c_re, double c_im, double r_re_min, double r_im_min, 
     comp.range_im_min = r_im_min;
     comp.range_re_max = r_re_max;
     comp.range_im_max = r_im_max;
+}
+
+void zoom(void){
+    comp.range_re_min /= 2;
+    comp.range_im_min /= 2;
+    comp.range_re_max /= 2;
+    comp.range_im_max /= 2;
+
+}
+void decrease_zoom(void){
+    comp.range_re_min *= 2;
+    comp.range_im_min *= 2;
+    comp.range_re_max *= 2;
+    comp.range_im_max *= 2;
+}
+void move(char c){
+
+    double range_re = (-comp.range_re_min + comp.range_re_max) / 4;
+    double range_im = -comp.range_im_min + comp.range_im_max / 4;
+    switch (c) {
+        case 'u':
+            comp.range_im_min += range_im;
+            comp.range_im_max += range_im;
+            break;
+        case 'd':
+            comp.range_im_min -= range_im;
+            comp.range_im_max -= range_im;
+            break;
+        case 'l':
+            comp.range_re_min -= range_re;
+            comp.range_re_max -= range_re;
+            break;
+        case 'r':
+            comp.range_re_min += range_re;
+            comp.range_re_max += range_re;
+            break;
+    }
+
 }
 
 

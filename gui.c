@@ -33,7 +33,7 @@ void gui_cleanup(void){
 
 void gui_refresh(void){
     if (gui.img){
-        update_image(gui.w, gui.h, gui.img);
+        redraw(gui.w, gui.h, gui.img);
         xwin_redraw(gui.w, gui.h, gui.img);
     }
 }

@@ -112,12 +112,45 @@ void* input_thread_kb(void *arg){ // Thread for reading an input from user keybo
             case 'l':
                 ev.type = EV_CLEAR_BUFFER;
                 break;
+
+
+            case 'z':
+                ev.type = EV_ZOOM;
+                break;
+            case 'h':
+                ev.type = EV_DECREASE_ZOOM;
+                break;
+            case 'd':
+                ev.type = EV_MOVE_D;
+                break;
+            case 'm':
+                ev.type = EV_MOVE_L;
+                break;
+            case 'n':
+                ev.type = EV_MOVE_R;
+                break;
+            case 'u':
+                ev.type = EV_MOVE_U;
+                break;
+            case 'o':
+                ev.type = EV_MOOD_O;
+                break;
             case '2':
                 ev.type = EV_MOOD_2;
                 break;
-            case 'o':
-                ev.type = EV_MOOD_1;
+            case '3':
+                ev.type = EV_MOOD_3;
                 break;
+            case '4':
+                ev.type = EV_MOOD_4;
+                break;
+            case '5':
+                ev.type = EV_MOOD_5;
+                break;
+            case '6':
+                ev.type = EV_MOOD_6;
+                break;
+
             default:
                 warn("Unknown keyboard command. To see the command look at README.md file");
                 break;
@@ -216,6 +249,7 @@ void* main_thread(void *arg) {
                 break;
             case EV_ABORT:
                 msg.type = MSG_ABORT;
+                move_chunk_back();
                 info("Computation aborted");
                 break;
             case EV_QUIT:
@@ -246,17 +280,62 @@ void* main_thread(void *arg) {
                 gui_refresh();
                 info("Computation on PC");
                 break;
-            case EV_MOOD_1: case EV_MOOD_2:
+            case EV_MOOD_O: case EV_MOOD_2: case EV_MOOD_3: case EV_MOOD_4: case EV_MOOD_5: case EV_MOOD_6:
                 if (!is_computing()){
-                    if (ev.type == EV_MOOD_2){
-                        set_parameters(-0.9, 0, -2, -2, 2, 2);
-                    } else if (ev.type == EV_MOOD_1){
-                        set_parameters(-0.4, 0.6, -1.6, -1.1, 1.6, 1.1);
+                    int e = ev.type;
+                    switch (e) {
+                        case EV_MOOD_O:
+                            set_parameters(-0.4, 0.6, -1.6, -1.1, 1.6, 1.1);
+                            break;
+                        case EV_MOOD_2:
+                            set_parameters(-0.9, 0.26, -2, -2, 2, 2);
+                            break;
+                        case EV_MOOD_3:
+                            set_parameters(-0.8696, 0, -2, -2, 2, 2);
+                            break;
+                        case EV_MOOD_4:
+                            set_parameters(0.285, 0.01, -2, -2, 2, 2);
+                            break;
+                        case EV_MOOD_5:
+                            set_parameters(-0.7269, 0.1889, -2, -2, 2, 2);
+                            break;
+                        case EV_MOOD_6:
+                            set_parameters(-0.8, 0.156, -2, -2, 2, 2);
+                            break;
                     }
                     msg.type = MSG_SET_COMPUTE;
                     info( set_compute(&msg) ? "Computation parameters were set " : "Failed to set computations parameters");
-
                 } else warn("You can't set new parameters while computing");
+                break;
+            case EV_ZOOM:
+                if (!is_computing()){
+                    zoom();
+                } else warn("You can't zoom while computing");
+                break;
+            case EV_DECREASE_ZOOM:
+                if (!is_computing()){
+                    decrease_zoom();
+                } else warn("You can't decrease zoom while computing");
+                break;
+            case EV_MOVE_L:
+                if (!is_computing()){
+                    move('l');
+                } else warn("You can't move parameters while computing");
+                break;
+            case EV_MOVE_R:
+                if (!is_computing()){
+                    move('r');
+                } else warn("You can't move parameters while computing");
+                break;
+            case EV_MOVE_U:
+                if (!is_computing()){
+                    move('u');
+                } else warn("You can't move parameters while computing");
+                break;
+            case EV_MOVE_D:
+                if (!is_computing()){
+                    move('d');
+                } else warn("You can't move parameters while computing");
                 break;
             default:
                 debug("Unknown event in main thread");

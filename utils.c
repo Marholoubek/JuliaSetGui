@@ -40,16 +40,16 @@ void call_termios(int reset)
 
 
 void info(const char *str){
-    fprintf(stderr, "INFO %s\n", str);
+    fprintf(stderr, "INFO: %s\n", str);
 }
 void debug(const char *str){
-    fprintf(stderr, "DEBUG %s\n", str);
+    fprintf(stderr, "DEBUG: %s\n", str);
 }
 
 void error(const char *str){
-    fprintf(stderr, "ERROR %s\n", str);
+    fprintf(stderr, "ERROR: %s\n", str);
 }
 void warn(const char *str){
-    fprintf(stderr, "WARN %s\n", str);
+    fprintf(stderr, "WARN: %s\n", str);
 }
 
