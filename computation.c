@@ -244,7 +244,7 @@ void my_compute(void){
     int w = comp.grid_w;
     int h = comp.grid_h;
     int n = comp.n;
-    c = comp.c_re + comp.c_im;
+    c = comp.c_re + comp.c_im * I;
     double range_re_min = comp.range_re_min;
     double range_im_min = comp.range_im_min;
     double range_re = -range_re_min + comp.range_re_max;
