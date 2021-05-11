@@ -39,7 +39,7 @@ void my_compute(void);
 
 void redraw(int w, int h, unsigned char *img);
 
-void set_parameters(double c_re, double c_im, double r_re_min, double r_im_min, double r_re_max, double r_im_max);
+void set_parameters(long double c_re, long double c_im, long double r_re_min, long double r_im_min, long double r_re_max, long double r_im_max);
 
 void zoom(int i);
 void move(char c);

@@ -3,14 +3,14 @@
 #include "computation.h"
 
 static struct {
-    double c_re;
-    double c_im;
+    long double c_re;
+    long double c_im;
     int n;
 
-    double range_re_min;
-    double range_re_max;
-    double range_im_min;
-    double range_im_max;
+    long  double range_re_min;
+    long  double range_re_max;
+    long  double range_im_min;
+    long  double range_im_max;
 
     int grid_w;
     int grid_h;
@@ -18,13 +18,13 @@ static struct {
     int cur_x;
     int cur_y;
 
-    double d_re;
-    double d_im;
+    long double d_re;
+    long  double d_im;
 
     int nbr_chunks;
     int cid;
-    double chunk_re;
-    double chunk_im;
+    long  double chunk_re;
+    long  double chunk_im;
 
     uint8_t chunk_n_re;
     uint8_t chunk_n_im;
@@ -112,7 +112,7 @@ bool set_compute(message *msg){
         comp.done = false;
         comp.is_set = true;
         printf("Computations parameters: w:%d, h:%d, chunks: %d\n", comp.grid_w, comp.grid_h, comp.nbr_chunks);
-        printf("Computations values: c = %3f + %3fj, Intervals: %3f + %3fj and %3f + %3fj,\n", comp.c_re, comp.c_im, comp.range_re_min, comp.range_im_min, comp.range_re_max, comp.range_im_max);
+        printf("Computations values: c = %.3Lf + %.3Lfj, Intervals: %.3Lf + %.3Lfj and %.3Lf + %.3Lfj,\n", comp.c_re, comp.c_im, comp.range_re_min, comp.range_im_min, comp.range_re_max, comp.range_im_max);
     }
 
     return ret;
@@ -245,10 +245,10 @@ void my_compute(void){
     int h = comp.grid_h;
     int n = comp.n;
     c = comp.c_re + comp.c_im * I;
-    double range_re_min = comp.range_re_min;
-    double range_im_min = comp.range_im_min;
-    double range_re = -range_re_min + comp.range_re_max;
-    double range_im = -range_im_min + comp.range_im_max;
+    long double range_re_min = comp.range_re_min;
+    long double range_im_min = comp.range_im_min;
+    long double range_re = -range_re_min + comp.range_re_max;
+    long double range_im = -range_im_min + comp.range_im_max;
 
     comp.computing = true;
     for (y = 0; y < h; ++y) {
@@ -265,7 +265,7 @@ void my_compute(void){
 }
 
 
-void set_parameters(double c_re, double c_im, double r_re_min, double r_im_min, double r_re_max, double r_im_max){
+void set_parameters(long double c_re, long double c_im, long double r_re_min, long double r_im_min, long double r_re_max, long double r_im_max){
     comp.c_im = c_im;
     comp.c_re = c_re;
     comp.range_re_min = r_re_min;
@@ -275,8 +275,8 @@ void set_parameters(double c_re, double c_im, double r_re_min, double r_im_min, 
 }
 
 void zoom(int i){
-    double range_re = (-comp.range_re_min + comp.range_re_max) / 4;
-    double range_im = (-comp.range_im_min + comp.range_im_max) / 4;
+    long double range_re = (-comp.range_re_min + comp.range_re_max) / 4;
+    long double range_im = (-comp.range_im_min + comp.range_im_max) / 4;
     if (comp.range_re_min >= -2 && comp.range_im_min >= -2 && comp.range_re_max <= 2 && comp.range_im_max <= 2) {
         comp.range_re_min += (i)*range_re;
         comp.range_im_min += (i)*range_im;
@@ -293,8 +293,8 @@ void zoom(int i){
 }
 void move(char c){
 
-    double range_re = (-comp.range_re_min + comp.range_re_max) / 4;
-    double range_im = (-comp.range_im_min + comp.range_im_max) / 4;
+    long double range_re = (-comp.range_re_min + comp.range_re_max) / 4;
+    long double range_im = (-comp.range_im_min + comp.range_im_max) / 4;
     switch (c) {
         case 'u':
             comp.range_im_min += range_im;
