@@ -1,9 +1,3 @@
-/*
- * Filename: event_queue.h
- * Date:     2017/04/15 12:41
- * Author:   Jan Faigl
- */
-
 #ifndef __EVENT_QUEUE_H__
 #define __EVENT_QUEUE_H__
 
@@ -46,7 +40,6 @@ typedef enum {
    EV_MOOD_4,
    EV_MOOD_5,
    EV_MOOD_6,
-
 } event_type;
 
 typedef struct {

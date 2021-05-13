@@ -1,17 +1,7 @@
-/*
- * Filename: prg_io_nonblock.c
- * Date:     2019/12/25 14:20
- * Author:   Jan Faigl
- */
-
 #include <assert.h>
-
 #include <fcntl.h>
 #include <unistd.h>
-#include <termios.h>
-
 #include <poll.h>
-
 #include "prg_io_nonblock.h"
 
 /// ----------------------------------------------------------------------------

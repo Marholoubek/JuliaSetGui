@@ -1,9 +1,3 @@
-/*
- * Filename: prg_io_nonblock.h
- * Date:     2019/12/25 14:20
- * Author:   Jan Faigl
- */
-
 #ifndef __PRG_IO_NONBLOCK_H__
 #define __PRG_IO_NONBLOCK_H__
 

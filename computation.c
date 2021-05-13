@@ -1,8 +1,7 @@
-
 #include "utils.h"
 #include "computation.h"
 
-static struct {
+static struct { // Structure for variables we need for computation
     double c_re;
     double c_im;
     int n;
@@ -34,7 +33,6 @@ static struct {
     bool done;
     bool abort;
     bool is_set;
-    bool is_hd;
 
 
 } comp = {
@@ -49,7 +47,6 @@ static struct {
         .grid_w = 640,
         .grid_h = 480,
 
-
         .chunk_n_re = 64,
         .chunk_n_im = 48,
 
@@ -58,25 +55,23 @@ static struct {
         .done = false,
         .abort = false,
         .is_set = false,
-        .is_hd = false,
-
 
 };
 
-void computation_init(void){
-
+void computation_init(void){ // Allocation of memory for computation and computing some variables
     comp.grid = my_alloc(comp.grid_w * comp.grid_h);
     comp.d_re = (comp.range_re_max - comp.range_re_min) / (1. * comp.grid_w);
     comp.d_im = -(comp.range_re_max - comp.range_re_min) / (1. * comp.grid_h);
     comp.nbr_chunks = (comp.grid_w * comp.grid_h) /  (comp.chunk_n_re * comp.chunk_n_im);
 
 }
-void computation_cleanup(void){
+
+void computation_cleanup(void){ // Cleaning the memory
     if (comp.grid) free(comp.grid);
     comp.grid = NULL;
 }
 
-bool reset_chunk(void){
+bool reset_chunk(void){ // Resetting the chunk index
     if (!is_abort()) {
         comp.cid = 0;
         comp.computing = true;
@@ -87,9 +82,7 @@ bool reset_chunk(void){
     return is_abort();
 }
 
-
-
-
+/* Informative functions */
 bool is_computing(void) {return comp.computing;}
 bool is_done(void) {return comp.done;}
 bool is_abort(void) {return comp.abort;}
@@ -98,7 +91,7 @@ bool is_set(void){ return comp.is_set;}
 void abort_comp(void){comp.abort = true;}
 void enable_comp(void){comp.abort = false;}
 
-bool set_compute(message *msg){
+bool set_compute(message *msg){ // Setting the computation values
     my_assert(msg != NULL, __func__ ,__LINE__, __FILE__);
     bool ret = !is_computing();
 
@@ -118,10 +111,8 @@ bool set_compute(message *msg){
     return ret;
 }
 
-
-bool compute(message *msg){
+bool compute(message *msg){ // Filling the message with data we need to be computed
     my_assert(msg != NULL, __func__ ,__LINE__, __FILE__);
-
     if (!is_computing()) {
         comp.cid = 0;
         comp.computing = true;
@@ -165,17 +156,10 @@ void move_chunk_back(void){
         comp.cid -= 1;
         comp.cur_x -= comp.chunk_n_re;
         comp.chunk_re -= comp.chunk_n_re * comp.d_re;
-        /*if (comp.cur_x >= comp.grid_w) {
-            comp.cur_x = 0;
-            comp.cur_y -= comp.chunk_n_im;
-            comp.chunk_re = comp.range_re_min;
-            comp.chunk_im -= comp.chunk_n_im * comp.d_im;
-        }*/
     }
 }
 
-void update_data(const msg_compute_data *compute_data){
-    // my assert
+void update_data(const msg_compute_data *compute_data){ // Updating the data in grid
     if (compute_data->cid == comp.cid){
         const int idx = comp.cur_x + compute_data->i_re + (comp.cur_y + compute_data->i_im) * comp.grid_w;
         if (idx >= 0 && idx < (comp.grid_w * comp.grid_h)){
@@ -185,11 +169,9 @@ void update_data(const msg_compute_data *compute_data){
             comp.done = true;
             comp.computing = false;
         }
-    } else {
-        error("Received chunk with unexpected chunk id");
-    }
-}
+    } else error("Received chunk with unexpected chunk id");
 
+}
 
 void get_grid_size(int *w, int *h){
     *w = comp.grid_w;
@@ -197,34 +179,29 @@ void get_grid_size(int *w, int *h){
 }
 
 
-// - function -----------------------------------------------------------------
-void redraw(int w, int h, unsigned char *img)
-{
+/* According to grid values, we translate it into colors  */
+void redraw(int w, int h, unsigned char *img) {
     uint8_t *grid = comp.grid;
     int threshold = comp.n;
     int nsize = w * h;
     unsigned char *cur = img;
-    for (int i = 0; i < nsize; ++i)
-    {
+    for (int i = 0; i < nsize; ++i) {
         const int n = *(grid++);
         const double t = 1. * n / threshold;
-        if (t < threshold)
-        {
+        if (t < threshold) {
             *(cur++) = (int)(9 * (1 - t) * t * t * t * 255);
             *(cur++) = (int)(15 * (1 - t) * (1 - t) * t * t * 255);
             *(cur++) = (int)(8.5 * (1 - t) * (1 - t) * (1 - t) * t * 255);
         }
-        else
-        {
-            for (int j = 0; j < 3; ++j)
-            {
+        else {
+            for (int j = 0; j < 3; ++j) {
                 *(cur++) = 0;
             }
         }
     }
 }
 
-void buffer_cleanup(void){
+void buffer_cleanup(void){ // Cleaning the buffer and setting all the values to zero
     computation_cleanup();
     computation_init();
     int w = comp.grid_w;
@@ -238,43 +215,40 @@ void buffer_cleanup(void){
 }
 
 void my_compute(void){
-
     complex double z, c;
     int x, y, i;
     int w = comp.grid_w;
     int h = comp.grid_h;
     int n = comp.n;
     c = comp.c_re + comp.c_im * I;
-    double range_re_min = comp.range_re_min;
-    double range_im_min = comp.range_im_min;
-    double range_re = -range_re_min + comp.range_re_max;
-    double range_im = -range_im_min + comp.range_im_max;
+    double range_re = -comp.range_re_min + comp.range_re_max;
+    double range_im = -comp.range_im_min + comp.range_im_max;
 
     comp.computing = true;
     for (y = 0; y < h; ++y) {
         for (x = 0; x < w; ++x) {
-            z = (range_re_min + x * (range_re / w)) + (range_im_min + y * (range_im / h)) * I;
+            z = (comp.range_re_min + x * (range_re / w)) + (comp.range_im_min + y * (range_im / h)) * I;
             i = 0;
-            while (cabs(z) < 2 && ++i < n)
-                z = z * z + c;
+            while (cabs(z) < 2 && ++i < n) z = z * z + c;
             comp.grid[((h - 1 - y) * w) + x] = i;
         }
     }
     comp.computing = false;
-
 }
 
-
+/* Setting new parameters for computation */
 void set_parameters(double c_re, double c_im, double r_re_min, double r_im_min, double r_re_max, double r_im_max){
-    comp.c_im = c_im;
-    comp.c_re = c_re;
-    comp.range_re_min = r_re_min;
-    comp.range_im_min = r_im_min;
-    comp.range_re_max = r_re_max;
-    comp.range_im_max = r_im_max;
+    if (!is_computing()) {
+        comp.c_im = c_im;
+        comp.c_re = c_re;
+        comp.range_re_min = r_re_min;
+        comp.range_im_min = r_im_min;
+        comp.range_re_max = r_re_max;
+        comp.range_im_max = r_im_max;
+    }
 }
 
-void zoom(int i){
+void zoom(int i){ // Zooming to the point, you're looking
     double range_re = (-comp.range_re_min + comp.range_re_max) / 4;
     double range_im = (-comp.range_im_min + comp.range_im_max) / 4;
     if (comp.range_re_min >= -2 && comp.range_im_min >= -2 && comp.range_re_max <= 2 && comp.range_im_max <= 2) {
@@ -282,17 +256,15 @@ void zoom(int i){
         comp.range_im_min += (i)*range_im;
         comp.range_re_max -= (i)*range_re;
         comp.range_im_max -= (i)*range_im;
-    }else {
+    } else {
         comp.range_re_min = -2;
         comp.range_im_min = -2;
         comp.range_re_max = 2;
         comp.range_im_max = 2;
     }
-
-
 }
-void move(char c){
 
+void move(char c){ // Mooving leef, right, up and down
     double range_re = (-comp.range_re_min + comp.range_re_max) / 4;
     double range_im = (-comp.range_im_min + comp.range_im_max) / 4;
     switch (c) {

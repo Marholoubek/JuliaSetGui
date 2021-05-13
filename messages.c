@@ -1,11 +1,4 @@
-/*
- * Filename: messages.c
- * Date:     2017/04/15 11:22
- * Author:   Jan Faigl
- */
-
 #include <string.h>
-
 #include "messages.h"
 
 // - function  ----------------------------------------------------------------

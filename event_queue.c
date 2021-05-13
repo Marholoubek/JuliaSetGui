@@ -1,7 +1,7 @@
 #include "event_queue.h"
 
 #ifndef QUEUE_CAPACITY
-#define QUEUE_CAPACITY 32
+#define QUEUE_CAPACITY 32 // Expecting there will not be more then 32 events waiting to be processed
 #endif
 
 
@@ -12,23 +12,18 @@ typedef struct {
     bool quit;
     pthread_mutex_t mtx;
     pthread_cond_t cond;
-
-
 } queue;
-
 
 static queue q = {
         .in = 0, .out = 0, .quit = false,
 };
 
-
 void queue_init(void){
     pthread_mutex_init(&(q.mtx), NULL); // Initialize mutex
     pthread_cond_init(&(q.cond), NULL);
-
 }
 
-void queue_cleanup(void){
+void queue_cleanup(void){ // Cleaning the queue
     while (q.in != q.out){
         event ev = queue_pop();
         if (ev.data.msg){
@@ -37,9 +32,9 @@ void queue_cleanup(void){
     }
 }
 
-event queue_pop(void){
+event queue_pop(void){ // Popping the events
     event ev = { .type = EV_TYPE_NUM};
-    pthread_mutex_lock(&(q.mtx)); // Precisely reading the global structure variables
+    pthread_mutex_lock(&(q.mtx));
     while (!q.quit && q.in == q.out) {
         pthread_cond_wait(&(q.cond), &(q.mtx));
     }
@@ -49,16 +44,14 @@ event queue_pop(void){
         pthread_cond_broadcast(&(q.cond));
     }
 
-
-
     pthread_mutex_unlock(&(q.mtx));
 
     return ev;
 
 }
 
-void queue_push(event ev){
-    pthread_mutex_lock(&(q.mtx)); // Precisely reading the global structure variables
+void queue_push(event ev){ // Pushing events to the queue
+    pthread_mutex_lock(&(q.mtx));
     while ((q.in + 1) % QUEUE_CAPACITY == q.out) {
         pthread_cond_wait(&(q.cond), &(q.mtx));
     }
@@ -74,7 +67,6 @@ void set_quit(){
     pthread_mutex_lock(&(q.mtx)); // Precisely reading the global structure variables
     q.quit = true;
     pthread_mutex_unlock(&(q.mtx));
-
 }
 
 bool is_quit(){
@@ -83,9 +75,6 @@ bool is_quit(){
     pthread_mutex_lock(&(q.mtx)); // Precisely reading the global structure variables
     quit = q.quit;
     pthread_mutex_unlock(&(q.mtx));
-
-    // unlock
-
     return quit;
 }
 

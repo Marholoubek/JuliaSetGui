@@ -22,21 +22,21 @@
 #define READ_TIMEOUT_MS 10 // Timeout for io_getc_timeout function
 #endif
 
-typedef struct { // Structure definition for carrying all the important variables
+typedef struct { // Structure definition for carrying all important variables for threads
     int in_pipe;
     int out_pipe;
 } data_t;
 
-
+/* Prototypes */
 void* input_thread_kb(void*);
 void* input_thread_pipe(void*);
 void* main_thread(void *arg);
 
 void process_pipe_message(event * const ev);
 
-// - main ---------------------------------------------------------------------
+
 int main(int argc, char *argv[]) {
-    data_t data = { // Initialization of structure with stat values
+    data_t data = {
             .in_pipe = -1,
             .out_pipe = -1,
     };
@@ -47,9 +47,9 @@ int main(int argc, char *argv[]) {
     data.in_pipe = io_open_read(in);
     data.out_pipe = io_open_write(out);
 
-    my_assert((data.in_pipe != -1 && data.out_pipe != -1), __func__, __LINE__, __FILE__);
+    my_assert((data.in_pipe != -1 && data.out_pipe != -1), __func__, __LINE__, __FILE__); // Pipes validation
 
-    enum { INPUT_KB, INPUT_PIPE, MAIN_THREAD, WIN_THREAD, NUM_THREADS }; // Creating an array of threads
+    enum { INPUT_KB, INPUT_PIPE, MAIN_THREAD, GUI_WIN_THREAD, NUM_THREADS }; // Creating an array of threads
     const char *thread_names[] = { "keyboard_thread", "pipe_input_thread", "main_thread", "gui_win_thread"};
     void* (*thr_functions[])(void*) = { input_thread_kb, input_thread_pipe, main_thread, gui_win_thread };
     pthread_t threads[NUM_THREADS];
@@ -71,23 +71,22 @@ int main(int argc, char *argv[]) {
     io_close(data.in_pipe); // Closing the pipes properly
     io_close(data.out_pipe);
 
-    queue_cleanup();
+    queue_cleanup(); // Clean the queue of events
 	  return EXIT_SUCCESS;
 }
 
 
-
-// - thread -----------------------------------------------------------------
-void* input_thread_kb(void *arg){ // Thread for reading an input from user keyboard
+/* Thread for reading an input from user keyboard and sending the events to main thread */
+void* input_thread_kb(void *arg){
     int c;
     static int ret = 0;
     event ev;
     bool q = false;
     call_termios(0);
 
-    while (!q && (c = getchar()) != EOF && c != 'q') {
+    while (!q && (c = getchar()) != EOF && c != 'q') { // While input isn't quited by 'q' or other thread, keyboard input creates event that's send to main thread
         ev.type = EV_TYPE_NUM;
-        switch(c) {
+        switch(c) { // All commands are specified in README.md file
             case 'g':
                 ev.type = EV_GET_VERSION;
                 break;
@@ -112,8 +111,6 @@ void* input_thread_kb(void *arg){ // Thread for reading an input from user keybo
             case 'l':
                 ev.type = EV_CLEAR_BUFFER;
                 break;
-
-
             case 'z':
                 ev.type = EV_ZOOM;
                 break;
@@ -150,14 +147,12 @@ void* input_thread_kb(void *arg){ // Thread for reading an input from user keybo
             case '6':
                 ev.type = EV_MOOD_6;
                 break;
-
-
             default:
                 warn("Unknown keyboard command. To see the command look at README.md file");
                 break;
         }
         if (ev.type != EV_TYPE_NUM){
-            queue_push(ev);
+            queue_push(ev); // Pushing the event to the queue
         }
         q = is_quit();
     }
@@ -168,24 +163,24 @@ void* input_thread_kb(void *arg){ // Thread for reading an input from user keybo
     return &ret;
 }
 
-// - thread -----------------------------------------------------------------
-void* input_thread_pipe(void *arg){ // Thread for reading an input from pipe
+/* Thread for reading an input from pipe and sending the event to the main thread */
+void* input_thread_pipe(void *arg){
     data_t *data = (data_t*) arg;
     static int ret = 0;
     unsigned char c;
-    uint8_t msg_buf[sizeof(message)];
+    uint8_t msg_buf[sizeof(message)]; // Message buffer for largest possible message
     int i = 0;
     int len = 0;
     bool q = is_quit();
 
-    while ((io_getc_timeout(data->in_pipe, READ_TIMEOUT_MS, &c)) > 0) {};
+    while ((io_getc_timeout(data->in_pipe, READ_TIMEOUT_MS, &c)) > 0) {} // Cleaning the mess in pipe
 
-    while (!q){ // While user don't want to quit
+    while (!q){ // While it isn't quited by quit event
         int r = io_getc_timeout(data->in_pipe, READ_TIMEOUT_MS, &c); // Reading the pipe input
         if (r > 0) { // If there was an input
             if (i == 0){
                 len = 0;
-                if (get_message_size(c, &len)) {
+                if (get_message_size(c, &len)) { // According to message size, we know how much bytes to read
                     msg_buf[i++] = c;
                 } else error("Unknown message received from the module");
 
@@ -193,7 +188,7 @@ void* input_thread_pipe(void *arg){ // Thread for reading an input from pipe
 
             if (len > 0 && i == len){
                 message *msg = my_alloc(sizeof(message));
-                if (parse_message_buf(msg_buf, len, msg)){
+                if (parse_message_buf(msg_buf, len, msg)){ // Parsing the message
                     event ev = { .type = EV_PIPE_IN_MESSAGE };
                     ev.data.msg = msg;
                     queue_push(ev);
@@ -203,8 +198,7 @@ void* input_thread_pipe(void *arg){ // Thread for reading an input from pipe
                 }
                 i = len = 0;
             }
-        } else if (r == -1) {
-            //error - quit
+        } else if (r == -1) { // Error - quit
             error("Reading from pipe was unsuccessful");
             set_quit();
             event ev = { .type = EV_QUIT };
@@ -215,6 +209,7 @@ void* input_thread_pipe(void *arg){ // Thread for reading an input from pipe
     return &ret;
 }
 
+/* Main thread is processing the events it received  */
 void* main_thread(void *arg) {
     static int ret = 0;
     data_t *data = (data_t *) arg;
@@ -223,8 +218,8 @@ void* main_thread(void *arg) {
     int msg_len;
     bool q = false;
 
-    computation_init();
-    gui_init();
+    computation_init(); // Setting the computation
+    gui_init(); // Creating the gui window and allocate the memory for it
 
     while (!q) {
 
@@ -233,7 +228,10 @@ void* main_thread(void *arg) {
         int e = ev.type;
 
 
-        switch (e) {
+        switch (e) { // According to event type
+            case EV_PIPE_IN_MESSAGE: // Event from pipe
+                process_pipe_message(&ev); // Processing it
+                break;
             case EV_GET_VERSION:
                 msg.type = MSG_GET_VERSION;
                 break;
@@ -259,9 +257,6 @@ void* main_thread(void *arg) {
                 info("Quit received. Good Bay and have a nice day!");
                 set_quit();
                 break;
-            case EV_PIPE_IN_MESSAGE:
-                process_pipe_message(&ev);
-                break;
             case EV_RESET_CHUNK:
                 if (!reset_chunk()) {
                     info("Chunk number has been reset");
@@ -283,7 +278,7 @@ void* main_thread(void *arg) {
                 gui_refresh();
                 info("Computation on PC");
                 break;
-            case EV_MOOD_O: case EV_MOOD_2: case EV_MOOD_3: case EV_MOOD_4: case EV_MOOD_5: case EV_MOOD_6:
+            case EV_MOOD_O: case EV_MOOD_2: case EV_MOOD_3: case EV_MOOD_4: case EV_MOOD_5: case EV_MOOD_6: // Setting different parameters
                 if (!is_computing()){
                     switch (e) {
                         case EV_MOOD_O:
@@ -309,7 +304,7 @@ void* main_thread(void *arg) {
                     info( set_compute(&msg) ? "Computation parameters were set " : "Failed to set computations parameters");
                 } else warn("You can't set new parameters while computing");
                 break;
-            case EV_ZOOM: case EV_DECREASE_ZOOM: case EV_MOVE_L:case EV_MOVE_R:case EV_MOVE_U:case EV_MOVE_D:
+            case EV_ZOOM: case EV_DECREASE_ZOOM: case EV_MOVE_L:case EV_MOVE_R:case EV_MOVE_U:case EV_MOVE_D: // Moving through image
                 if (!is_computing()){
                     switch (e) {
                         case EV_ZOOM:
@@ -365,7 +360,7 @@ void* main_thread(void *arg) {
 }
 
 
-void process_pipe_message(event * const ev){
+void process_pipe_message(event * const ev){ // Processing events from pipe
     ev->type = EV_TYPE_NUM;
     const message *msg = ev->data.msg;
     switch (msg->type) {
@@ -391,7 +386,7 @@ void process_pipe_message(event * const ev){
             break;
         case MSG_ABORT:
             abort_comp();
-            move_chunk_back();
+            move_chunk_back(); // To avoid black chunk after the new computing
             info("Computation aborted");
             break;
         case MSG_COMPUTE_DATA:
