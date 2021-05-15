@@ -63,8 +63,7 @@ int main(int argc, char *argv[]) {
     int *ex; // For saving returned values
     for(int i = 0; i < NUM_THREADS; ++i){ // Running the threads
         printf("Call join to thread '%s'\r\n", thread_names[i]);
-        int r = pthread_join(threads[i], (void*)&ex);
-        printf("Joining thread '%s' has been %s -- return values %d\r\n", thread_names[i], (r == 0 ? "OK" : "FAIL"), *ex);
+        pthread_join(threads[i], (void*)&ex);
     }
 
 
